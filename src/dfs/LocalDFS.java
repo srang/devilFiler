@@ -16,12 +16,13 @@ public class LocalDFS extends DFS {
 
     @Override
     public DFileID createDFile() {
-        return null;
+        DFileID dFID = new DFileID();
+    	return dFID;
     }
 
     @Override
     public void destroyDFile(DFileID dFID) {
-        dFID.getDFileID()
+        dFID.getDFileID();
     }
 
     @Override
