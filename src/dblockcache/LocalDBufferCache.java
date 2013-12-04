@@ -37,6 +37,12 @@ public class LocalDBufferCache extends DBufferCache{
     @Override
     public void sync() {
         // write dirty data to disk
+    	for (int i = 0; i<this.buffers.size(); i++){
+    		if(this.buffers.get(this.buffers.keySet().toArray()[i]).isDirty){
+    			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.startPush();
+    			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.waitClean(); // is this wait appropriate here?
+    		}
+    	}
     }
 
     private static class CacheEntry {
