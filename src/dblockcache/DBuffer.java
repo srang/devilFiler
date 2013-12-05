@@ -1,6 +1,9 @@
 package dblockcache;
 
 public abstract class DBuffer {
+	protected boolean busy;
+	protected boolean isValid;
+	protected boolean isClean;
 	/* Start an asynchronous fetch of associated block from the volume */
 	public abstract void startFetch();
 	

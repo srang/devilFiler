@@ -24,22 +24,26 @@ public class LocalDBufferCache extends DBufferCache{
     public DBuffer getBlock(int blockID) {
         if (buffers.containsKey(blockID)) {
             CacheEntry entry = buffers.get(blockID);
+            entry.buffer.busy = true; // held until released
             return entry.buffer;
         }
         buffers.put(blockID,new CacheEntry(new LocalDBuffer()));
+        buffers.get(blockID).buffer.busy = true; // held until released
         return buffers.get(blockID).buffer;
     }
     // this may no longer need to be explicitly called.
     @Override
     public void releaseBlock(DBuffer buf) {
-
+    	if (this.buffers.containsValue(buf))
+    		buf.busy = false;
+    	// does a signal here?
     }
 
     @Override
     public void sync() {
         // write dirty data to disk
     	for (int i = 0; i<this.buffers.size(); i++){
-    		if(this.buffers.get(this.buffers.keySet().toArray()[i]).isDirty){
+    		if(!this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.isClean){
     			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.startPush();
     			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.waitClean(); // is this wait appropriate here?
     		}
@@ -47,12 +51,12 @@ public class LocalDBufferCache extends DBufferCache{
     }
 
     private static class CacheEntry {
-        private boolean isDirty;
-        private DBuffer buffer;
+        //private boolean isDirty;
+        private LocalDBuffer buffer;
 
-        private CacheEntry(DBuffer buffer) {
+        private CacheEntry(LocalDBuffer buffer) {
             this.buffer = buffer;
-            this.isDirty = false;
+            //this.isDirty = false;
         }
     }
 }

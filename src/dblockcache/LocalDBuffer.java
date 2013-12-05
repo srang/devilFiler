@@ -14,42 +14,54 @@ public class LocalDBuffer extends DBuffer {
 
     @Override
     public boolean checkValid() {
-        return false;
+        return this.isValid;
     }
 
     @Override
     public boolean waitValid() {
+    	// while (!this.isValid)
+    	//		this.wait()
         return false;
     }
 
     @Override
     public boolean checkClean() {
-        return false;
+        return this.isClean;
     }
 
     @Override
     public boolean waitClean() {
+    	// while (!this.isClean)
+    	//		this.wait()
         return false;
     }
 
     @Override
     public boolean isBusy() {
-    	return false;
+    	return this.busy;
     }
 
     @Override
     public int read(byte[] buffer, int startOffset, int count) {
-        return 0;
+    	this.busy = true; // pinned until ioComplete
+    	//if (!this.checkValid())
+    	// this.waitValid()
+    	//	read
+    	return 0;
     }
 
     @Override
     public int write(byte[] buffer, int startOffset, int count) {
-        return 0;
+        this.busy = true; // pinned until ioComplete
+        // while(writing)
+        //		this.isValid = false;
+        this.isClean = false; // mark as dirty
+    	return 0;
     }
     // upcall from VirtualDisk
     @Override
     public void ioComplete() {
-
+    	this.busy = false;
     }
 
     @Override
