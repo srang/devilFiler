@@ -3,7 +3,6 @@ package dblockcache;
 import common.Constants;
 
 public abstract class DBufferCache {
-	
 	private int _cacheSize;
 	
 	/*

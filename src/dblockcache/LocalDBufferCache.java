@@ -14,7 +14,8 @@ public class LocalDBufferCache extends DBufferCache{
             protected boolean removeEldestEntry(Map.Entry<Integer, CacheEntry> eldest) {
                 // When to remove the eldest buffer
                 // extra eviction logic about being pinned or held should go here
-                return size() > cacheSize; // Size exceeded the max allowed.
+
+            		return size() > cacheSize; // Size exceeded the max allowed.
             }
         };
     }

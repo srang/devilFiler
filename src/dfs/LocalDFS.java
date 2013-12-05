@@ -5,10 +5,14 @@ import common.DFileID;
 
 import java.util.*;
 
+import dblockcache.DBufferCache;
+import dblockcache.LocalDBufferCache;
+
 public class LocalDFS extends DFS {
     private List<DFileID> dfiles;
     private Queue<Integer> free;
     private Set<Integer> used;
+    private DBufferCache dbuff;
 
     @Override
     public void init() {
@@ -58,6 +62,7 @@ public class LocalDFS extends DFS {
 
     @Override
     public void sync() {
+    	this.dbuff.sync();
 
     }
 }
