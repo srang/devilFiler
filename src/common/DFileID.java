@@ -4,6 +4,7 @@ package common;
 public class DFileID {
 
 	private int _dFID;
+	private Inode inode;
 
 	public DFileID(int dFID) {
 		_dFID = dFID;
@@ -11,6 +12,10 @@ public class DFileID {
 
 	public int getDFileID() {
 		return _dFID;
+	}
+	
+	public Inode getINode(){
+		return this.inode;
 	}
 	    
 	public boolean equals(Object other){

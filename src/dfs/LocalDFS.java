@@ -35,29 +35,46 @@ public class LocalDFS extends DFS {
 
     @Override
     public void destroyDFile(DFileID dFID) {
-        dfiles.remove(dFID);
-        used.remove(dFID); // file Id is no longer used
-        free.add(dFID.getDFileID()); // let file descriptor be reused
+        this.dfiles.remove(dFID);
+        this.used.remove(dFID); // file Id is no longer used
+        this.free.add(dFID.getDFileID()); // let file descriptor be reused
     }
 
     @Override
     public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
-        return 0;
+        // don't know if this is quite right...
+    	// basically DFS read/write calls just call specific DBUffer read/writes
+    	for (int i = 0; i<dFID.getINode().getBlockMap().size(); i++){
+        	this.dbuff.getBlock(dFID.getINode().getBlockMap().get(i)).read(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
+        }
+    	return 0; // return statement?
     }
 
     @Override
     public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
-        return 0;
+    	for (int i = 0; i<dFID.getINode().getBlockMap().size(); i++){
+        	this.dbuff.getBlock(dFID.getINode().getBlockMap().get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
+        }
+    	return 0;
     }
 
     @Override
     public int sizeDFile(DFileID dFID) {
-        return 0;
+        // go through every buffer associated with a dFID, check for values at the bytes in those blocks, and calculate size accordingly
+    	int size = 0;
+    	for (int i = 0; i<dFID.getINode().getBlockMap().size(); i++){
+    		for(int j = 0; j<this.dbuff.getBlock(dFID.getINode().getBlockMap().get(i)).getBuffer().length; j++){
+    			if(this.dbuff.getBlock(dFID.getINode().getBlockMap().get(i)).getBuffer()[j] != 0){// if there is something written at this byte...
+    				size++;
+    			}
+    		}
+    	}
+    	return size;
     }
 
     @Override
     public List<DFileID> listAllDFiles() {
-        return dfiles;
+        return this.dfiles;
     }
 
     @Override
