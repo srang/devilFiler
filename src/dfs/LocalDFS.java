@@ -13,7 +13,7 @@ public class LocalDFS extends DFS {
     private List<DFileID> dfiles;
     private Queue<Integer> free;
     private Set<Integer> used;
-    private DBufferCache dbuff;
+    private DBufferCache _cache;
     
     private Queue<Inode> freeINodes;
     private Set<Inode> usedINodes;
@@ -76,11 +76,13 @@ public class LocalDFS extends DFS {
 
     @Override
     public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
-        // don't know if this is quite right...
-    	// basically DFS read/write calls just call specific DBUffer read/writes
+    	/* File bounds check */
+    	if(dFID.fileSize < startOffset + count) {
+    		return -1; 
+    	}    	
     	for (int j = 0; j<dFID.getINode().size(); j++){
     		for (int i = 0; i<dFID.getINode().get(j).getBlockMap().size(); i++){
-        		this.dbuff.getBlock(dFID.getINode().get(j).getBlockMap().get(i)).read(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
+        		_cache.getBlock(dFID.getINode().get(j).getBlockMap().get(i)).read(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
         	}
     	}
     	return 0; // return statement?
@@ -88,13 +90,24 @@ public class LocalDFS extends DFS {
 
     @Override
     public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
+    	boolean expandFile = dFID.fileSize < count;
+    	/*
+    	 * Following section assumes (x+n-1)/n = ceil(x/n)
+    	 */
+    	if(expandFile && (dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE < (count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE) {//need another block 
+    		if(((dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2)>
+    		((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2)){
+    			//append inode
+    		}
+    		//append memory block
+    	}
+    	
     	for (int j = 0; j<dFID.getINode().size(); j++){
     		for (int i = 0; i<dFID.getINode().get(j).getBlockMap().size(); i++){
-        		this.dbuff.getBlock(dFID.getINode().get(j).getBlockMap().get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
+        		_cache.getBlock(dFID.getINode().get(j).getBlockMap().get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
         	}
     	}
-    		dFID.fileSize += buffer.length;
-    	
+    	dFID.fileSize = (expandFile) ? count : dFID.fileSize;
     	return 0;
     }
 
@@ -110,7 +123,7 @@ public class LocalDFS extends DFS {
 
     @Override
     public void sync() {
-    	this.dbuff.sync();
+    	this._cache.sync();
 
     }
 }

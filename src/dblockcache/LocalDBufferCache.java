@@ -27,9 +27,11 @@ public class LocalDBufferCache extends DBufferCache{
             entry.buffer.busy = true; // held until released
             return entry.buffer;
         }
-        buffers.put(blockID,new CacheEntry(new LocalDBuffer()));
-        buffers.get(blockID).buffer.busy = true; // held until released
-        return buffers.get(blockID).buffer;
+        LocalDBuffer buff = new LocalDBuffer();
+        buffers.put(blockID,new CacheEntry(buff));
+        buff.isValid = false;
+        buff.busy = true; // held until released
+        return buff;
     }
     // this may no longer need to be explicitly called.
     @Override
