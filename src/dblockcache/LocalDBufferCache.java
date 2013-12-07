@@ -38,7 +38,8 @@ public class LocalDBufferCache extends DBufferCache{
     public void releaseBlock(DBuffer buf) {
     	if (this.buffers.containsValue(buf))
     		buf.busy = false;
-    	// does a signal here?
+    		this.notifyAll();
+    	// does a signal go here?
     }
 
     @Override
@@ -48,17 +49,16 @@ public class LocalDBufferCache extends DBufferCache{
     		if(!this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.isClean){
     			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.startPush();
     			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.waitClean(); // is this wait appropriate here?
+    			// some kind of signal here
     		}
     	}
     }
 
     private static class CacheEntry {
-        //private boolean isDirty;
         private LocalDBuffer buffer;
 
         private CacheEntry(LocalDBuffer buffer) {
             this.buffer = buffer;
-            //this.isDirty = false;
         }
     }
 }

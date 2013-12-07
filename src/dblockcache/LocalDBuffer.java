@@ -1,15 +1,41 @@
 package dblockcache;
 
+import java.io.IOException;
+
+import common.Constants.DiskOperationType;
+
+import virtualdisk.LocalVirtualDisk;
+
 public class LocalDBuffer extends DBuffer {
     // a DBuffer is an abstraction over a byte array and block id
-    @Override
+	private LocalVirtualDisk disk;
+	private int blockID;
+	private byte[] buffer;
+	
+	@Override
     public void startFetch() {
-
+    	try {
+			disk.startRequest(this, DiskOperationType.READ);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     @Override
     public void startPush() {
-
+    	try {
+			disk.startRequest(this, DiskOperationType.WRITE);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     @Override
@@ -19,9 +45,15 @@ public class LocalDBuffer extends DBuffer {
 
     @Override
     public boolean waitValid() {
-    	// while (!this.isValid)
-    	//		this.wait()
-        return false;
+    	while (!this.isValid){
+			try {
+				this.wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+        return this.checkValid();
     }
 
     @Override
@@ -31,9 +63,15 @@ public class LocalDBuffer extends DBuffer {
 
     @Override
     public boolean waitClean() {
-    	// while (!this.isClean)
-    	//		this.wait()
-        return false;
+    	while (!this.isClean){
+    			try {
+					this.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    	}
+        return this.checkClean();
     }
 
     @Override
@@ -62,15 +100,16 @@ public class LocalDBuffer extends DBuffer {
     @Override
     public void ioComplete() {
     	this.busy = false;
+    	this.notifyAll();
     }
 
     @Override
     public int getBlockID() {
-        return 0;
+        return this.blockID;
     }
 
     @Override
     public byte[] getBuffer() {
-        return new byte[0];
+        return this.buffer;
     }
 }
