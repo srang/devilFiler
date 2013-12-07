@@ -55,21 +55,15 @@ public class LocalDFS extends DFS {
     	for (int i = 0; i<dFID.getINode().getBlockMap().size(); i++){
         	this.dbuff.getBlock(dFID.getINode().getBlockMap().get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
         }
+    	
+    	dFID.getINode().fileSize+=buffer.length;
+    	
     	return 0;
     }
 
     @Override
     public int sizeDFile(DFileID dFID) {
-        // go through every buffer associated with a dFID, check for values at the bytes in those blocks, and calculate size accordingly
-    	int size = 0;
-    	for (int i = 0; i<dFID.getINode().getBlockMap().size(); i++){
-    		for(int j = 0; j<this.dbuff.getBlock(dFID.getINode().getBlockMap().get(i)).getBuffer().length; j++){
-    			if(this.dbuff.getBlock(dFID.getINode().getBlockMap().get(i)).getBuffer()[j] != 0){// if there is something written at this byte...
-    				size++;
-    			}
-    		}
-    	}
-    	return size;
+    	return dFID.getINode().fileSize;
     }
 
     @Override

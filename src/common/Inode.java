@@ -6,6 +6,7 @@ public class Inode {
 	private int blockID;
 	private int offset;
 	private DFileID fileID;
+	public int fileSize;
 	private ArrayList<Integer> blockMap;
 	
 	// set methods
