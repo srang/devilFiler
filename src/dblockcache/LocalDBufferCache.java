@@ -36,6 +36,7 @@ public class LocalDBufferCache extends DBufferCache{
     public void releaseBlock(DBuffer buf) {
     	if (this.buffers.containsValue(buf))
     		buf.busy = false;
+    		this.notifyAll();
     	// does a signal here?
     }
 
@@ -51,12 +52,10 @@ public class LocalDBufferCache extends DBufferCache{
     }
 
     private static class CacheEntry {
-        //private boolean isDirty;
         private LocalDBuffer buffer;
 
         private CacheEntry(LocalDBuffer buffer) {
             this.buffer = buffer;
-            //this.isDirty = false;
         }
     }
 }
