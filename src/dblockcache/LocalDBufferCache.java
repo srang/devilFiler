@@ -37,7 +37,7 @@ public class LocalDBufferCache extends DBufferCache{
     	if (this.buffers.containsValue(buf))
     		buf.busy = false;
     		this.notifyAll();
-    	// does a signal here?
+    	// does a signal go here?
     }
 
     @Override
@@ -47,6 +47,7 @@ public class LocalDBufferCache extends DBufferCache{
     		if(!this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.isClean){
     			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.startPush();
     			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.waitClean(); // is this wait appropriate here?
+    			// some kind of signal here
     		}
     	}
     }
