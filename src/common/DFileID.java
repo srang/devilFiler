@@ -1,10 +1,13 @@
 package common;
 
+import java.util.ArrayList;
+
 /* typedef DFileID to int */
 public class DFileID {
 
 	private int _dFID;
-	private Inode _inode;
+	public ArrayList<Inode> inode;
+	public int fileSize;
 
 	public DFileID(int dFID) {
 		_dFID = dFID;
@@ -15,8 +18,8 @@ public class DFileID {
 		return _dFID;
 	}
 	
-	public Inode getINode(){
-		return _inode;
+	public ArrayList<Inode> getINode(){
+		return this.inode;
 	}
 	    
 	public boolean equals(Object other){

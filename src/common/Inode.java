@@ -6,8 +6,8 @@ public class Inode {
 	private int blockID;
 	private int offset;
 	private DFileID fileID;
-	public int fileSize;
 	private ArrayList<Integer> blockMap;
+	private int fileSize;
 	
 	// set methods
 	public void setBlockID(int block){
@@ -20,6 +20,10 @@ public class Inode {
 	
 	public void setfileID(DFileID ID){
 		this.fileID = ID;
+	}
+	
+	public void setFileSize(int size){
+		this.fileSize = size;
 	}
 	
 	public void add(int fileBlock){
