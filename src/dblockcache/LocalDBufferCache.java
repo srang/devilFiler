@@ -28,7 +28,7 @@ public class LocalDBufferCache extends DBufferCache {
             moveToBack(blockID);
             return entry;
         }
-        LocalDBuffer buff = new LocalDBuffer(disk);
+        DBuffer buff = new LocalDBuffer(disk);
         buff.isValid = false; // this should be initialized in constructor
         buff.state = DBuffer.BufferState.HELD; // held until released
         if (buffers.size() == cacheSize){
