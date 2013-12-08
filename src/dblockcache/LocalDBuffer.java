@@ -78,7 +78,7 @@ public class LocalDBuffer extends DBuffer {
 
     @Override
     public boolean isBusy() {
-    	return (this.state != DBuffer.BufferState.FREE);
+    	return (this.state != BufferState.FREE);
     }
 
     @Override
@@ -88,32 +88,30 @@ public class LocalDBuffer extends DBuffer {
     		waitValid();
     	}
     	isValid = true;
+    	state = BufferState.PINNED;
     	for(int i = 0; i < count; i++) {
     		buffer[startOffset + i] = _buffer[startOffset + i]; 
     	}
+    	state = BufferState.HELD;
     	this.notifyAll();
     	return 0;
     }
 
     @Override
     public int write(byte[] buffer, int startOffset, int count) {
-        byte[] hold = new byte[_buffer.length+count];
-        for(int j = 0; j<_buffer.length; j++){
-        	hold[j] = _buffer[j];
-        }
-        _buffer = hold;// add on and expand buffer if subsequent write
-        for(int i = 0; i<count; i++) {
-        	_buffer[startOffset+i] = buffer[startOffset+i];
-        }
-        this.isClean = false; // mark as dirty
-        this.isValid = true;
-        //notify?
-    	return 0;
+    	this.isClean = false; // mark as dirty
+    	state = BufferState.PINNED;
+    	for(int i = 0; i < count; i++) {
+    		_buffer[startOffset + i] = buffer[startOffset + i];
+    	}
+        state = BufferState.HELD;
+        this.notifyAll();
+        return 0;
     }
     // upcall from VirtualDisk
     @Override
     public void ioComplete() {
-    	state = DBuffer.BufferState.HELD;
+    	state = BufferState.HELD;
     	this.notifyAll();
     }
 
