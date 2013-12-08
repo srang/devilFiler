@@ -9,6 +9,11 @@ public class Inode {
 	private ArrayList<Integer> blockMap;
 	private int fileSize;
 	
+	public Inode() {
+		blockMap = new ArrayList<Integer>();
+		fileSize = 0;
+	}
+	
 	// set methods
 	public void setBlockID(int block){
 		this.blockID = block;
