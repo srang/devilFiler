@@ -82,7 +82,7 @@ public class LocalDBuffer extends DBuffer {
     }
 
     @Override
-    public int read(byte[] buffer, int startOffset, int count) {
+    public synchronized int read(byte[] buffer, int startOffset, int count) {
     	if(!isValid){
     		startFetch();
     		waitValid();
@@ -98,7 +98,7 @@ public class LocalDBuffer extends DBuffer {
     }
 
     @Override
-    public int write(byte[] buffer, int startOffset, int count) {
+    public synchronized int write(byte[] buffer, int startOffset, int count) {
     	this.isClean = false; // mark as dirty
     	state = BufferState.PINNED;
     	for(int i = 0; i < count; i++) {
