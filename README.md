@@ -37,12 +37,20 @@
  Files are either pinned or held after creation until they are explicitly released
  	at which point their DBuffers are evictable from memory
 
+Inode.java:
+The Inode is an abstraction for part of a file. 
+*We use the first 4 bytes of the on-disk inode to specify the FileID and where the
+**inode fits into the file.
+
+LocalVirtualDisk.java:
+The disk is split into Inode-Region and Main-Disk-Region. The Inode-Region is large 
+that we can reference enough memory blocks for the max file size for the max number
+of files. 
+
 VirtualDisk.java:
 The only thing added to this file is the private rebuild() function which is the 
 alternative to formatStore(). rebuild() attempts to read the file _volumeName and 
-create our object hierarchy from its data. It also checks to see if the data is 
-corrupted.
-
+create our object hierarchy from its data. 
 
 /************************
  * Feedback on the lab

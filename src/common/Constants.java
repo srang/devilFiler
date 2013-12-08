@@ -20,10 +20,10 @@ public class Constants {
 	public static final int MAX_FILE_SIZE = BLOCK_SIZE*500; // Constraint on the max file size
 	public static final int BLOCK_ADDRESS_SIZE = 4; // 
 	public static final int BYTE_OFFSET = 256; // Used for incrementing file_ids with inode index
-    public static final int BLOCK_ADDRESSES_PER_INODE = 6;// depends on how much metadata is store in each inode
+    public static final int BLOCK_ADDRESSES_PER_INODE = (INODE_SIZE / BLOCK_ADDRESS_SIZE) - 2;// depends on how much metadata is store in each inode
 	public static final int MAX_DFILES = 512; // For recylcing DFileIDs
 
-	public static final int INODE_REGION_SIZE = MAX_DFILES * (MAX_FILE_SIZE/BLOCK_SIZE); // Memory blocks
+	public static final int INODE_REGION_SIZE = MAX_DFILES * (MAX_FILE_SIZE/BLOCK_SIZE) / (BLOCK_ADDRESSES_PER_INODE * BLOCK_SIZE / INODE_SIZE); // Memory blocks
 	
 	/* DStore Operation types */
 	public enum DiskOperationType {
