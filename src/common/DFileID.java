@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class DFileID {
 
 	private int _dFID;
-	public ArrayList<Inode> inodeList;
+	private ArrayList<Inode> inodeList;
 	public int fileSize;
 
 	public DFileID(int dFID) {

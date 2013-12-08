@@ -31,7 +31,7 @@ public class LocalDFS extends DFS {
             freeFileIDs.add(i);
         }
         
-        for (int j = 0; j < (Constants.INODE_SIZE/4); j++){
+        for (int j = 0; j < (Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE); j++){
         	((LinkedList<Inode>) freeINodes).addFirst(new Inode());
         	for(int k = 0; k<Constants.NUM_OF_BLOCKS; k++){
         		for(int m = 0; m<(Constants.BLOCK_SIZE/Constants.INODE_SIZE); m++){
