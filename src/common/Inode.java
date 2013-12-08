@@ -7,11 +7,11 @@ public class Inode {
 	private int offset;
 	private DFileID fileID;
 	private ArrayList<Integer> blockMap;
-	private int fileSize;
+	private int inodeSize;//Size of space on disk referenced by inode
 	
 	public Inode() {
 		blockMap = new ArrayList<Integer>();
-		fileSize = 0;
+		inodeSize = 0;
 	}
 	
 	// set methods
@@ -27,8 +27,8 @@ public class Inode {
 		this.fileID = ID;
 	}
 	
-	public void setFileSize(int size){
-		this.fileSize = size;
+	public void setInodeSize(int size){
+		inodeSize = size;
 	}
 	
 	public void add(int fileBlock){
@@ -36,8 +36,8 @@ public class Inode {
 	}
 	
 	// get methods
-	public int Size(){
-		return Constants.INODE_SIZE;
+	public int getInodeSize(){
+		return inodeSize;
 	}
 	
 	public int getBlockID(){

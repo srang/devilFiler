@@ -5,6 +5,7 @@ import common.DFileID;
 import common.Inode;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 import dblockcache.DBufferCache;
@@ -86,7 +87,7 @@ public class LocalDFS extends DFS {
         usedINodes.add(inode);
         inode.setfileID(newDfile);
         newDfile.getINodeList().add(inode);
-        updateDiskINodes(inode);
+        updateFileDes(newDfile);
         
         return newDfile;
         // associate with first iNode, make set of inodes to work with
@@ -143,6 +144,7 @@ public class LocalDFS extends DFS {
     	int num_inodes_needed = ((dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2);
     	int num_inodes_have   = ((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2);
     	if(expandFile) {//need another block 
+    		dFID.fileSize = count;
     		if(num_inodes_needed > num_inodes_have){//need more inodes & blocks
     			for(int i = 0; i < (num_inodes_needed-num_inodes_have); i++) {
     				Inode inode = freeINodes.poll();
@@ -154,7 +156,6 @@ public class LocalDFS extends DFS {
     		    		usedBlocks.add(bID);
     		    		fileINodes.get(fileINodes.size()-1).add(bID);	
     				}
-    				updateDiskINodes(fileINodes.get(fileINodes.size()-1));
     			}
     		} else if(num_blocks_needed > num_blocks_have){//just need more blocks
     			for(int i = 0; i < num_blocks_needed-num_blocks_have; i++) {
@@ -162,17 +163,21 @@ public class LocalDFS extends DFS {
             		usedBlocks.add(bID);
             		fileINodes.get(fileINodes.size()-1).add(bID);
     			}
-    			updateDiskINodes(fileINodes.get(fileINodes.size()-1));
-    		}    		
+    		}  
+    		updateFileDes(dFID);
     	}
     	
     	for (int j = 0; j<fileINodes.size(); j++){
     		ArrayList<Integer> fileBlockMap = fileINodes.get(j).getBlockMap();
     		for (int i = 0; i<fileBlockMap.size(); i++){
-        		_cache.getBlock(fileBlockMap.get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
+        		_cache.getBlock(fileBlockMap.get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));       		
+    		}
+    		if(j < fileINodes.size()-1) {//not the last mem_block 
+    			fileINodes.get(j).setInodeSize(Constants.BLOCK_ADDRESSES_PER_INODE * Constants.BLOCK_SIZE);    			
+    		} else {
+    			fileINodes.get(j).setInodeSize(count%Constants.BLOCK_ADDRESSES_PER_INODE * Constants.BLOCK_SIZE);
     		}
     	}
-    	dFID.fileSize = (expandFile) ? count : dFID.fileSize;
     	return 0;
     }
 
@@ -188,12 +193,52 @@ public class LocalDFS extends DFS {
 
     @Override
     public void sync() {
-    	
     	this._cache.sync();
     }
     
-    private void updateDiskINodes(Inode i) {
-    	_cache.getBlock(i.getBlockID());
-    	//byte[] inodeInfo = new byte[]
+    private void updateFileDes(DFileID id) {
+    	byte[] buff = new byte[id.getINodeList().size()*Constants.INODE_SIZE];
+    	for(int i = 0; i < id.getINodeList().size(); i++) {
+    		Inode node = id.getINodeList().get(i);
+    		int inodeIndexedFileID = node.getFileID()+i;
+    		byte[] address = ByteBuffer.allocate(4).putInt(inodeIndexedFileID).array();
+    		for(int j = 0; j < address.length; j++) {
+    			buff[i*Constants.INODE_SIZE+j] = address[j];//writing out fileID with the inode index
+    		}
+    		byte[] size = ByteBuffer.allocate(4).putInt(node.getInodeSize()).array();
+    		for(int j = 0; j < size.length; j++) {
+    			buff[i*Constants.INODE_SIZE+ j + Constants.BLOCK_ADDRESS_SIZE] = size[j];//writing out size in bytes
+    		} 
+    		ArrayList<Integer> blockMap = node.getBlockMap();
+    		for(int x = 0; x < blockMap.size(); x++) {
+    			int blockAddress = blockMap.get(x);
+    			byte[] byteBlockAddress = ByteBuffer.allocate(4).putInt(blockAddress).array();
+    			for(int j = 0; j < byteBlockAddress.length; j++) {
+    				buff[i*Constants.INODE_SIZE + j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE] = byteBlockAddress[j];
+    			}
+    		}
+    	}
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
