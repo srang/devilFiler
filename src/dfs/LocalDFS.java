@@ -131,7 +131,7 @@ public class LocalDFS extends DFS {
     		((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2)){
     			fileINodes.add(freeINodes.poll());
     		}
-    		//TODO: fileINodes.get(fileINodes.size()-1).add(*FREEBLOCK*);
+    		fileINodes.get(fileINodes.size()-1).add(freeBlocks.poll());
     	}
     	
     	for (int j = 0; j<fileINodes.size(); j++){
