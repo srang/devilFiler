@@ -20,14 +20,14 @@ public class LocalDBufferCache extends DBufferCache {
     public synchronized DBuffer getBlock(int blockID) {
         if (buffers.containsKey(blockID)) {
             DBuffer entry = buffers.get(blockID);
-            entry.busy = true; // held until released
+            entry.state = DBuffer.BufferState.HELD; // held until released
             // existing blocks should be moved to the back of the queue
             moveToBack(blockID);
             return entry;
         }
         LocalDBuffer buff = new LocalDBuffer();
         buff.isValid = false; // this should be initialized in constructor
-        buff.busy = true; // held until released
+        buff.state = DBuffer.BufferState.HELD; // held until released
         if (buffers.size() == cacheSize){
             evict();
         }
@@ -60,9 +60,9 @@ public class LocalDBufferCache extends DBufferCache {
     @Override
     public synchronized void releaseBlock(DBuffer buf) {
         if (this.buffers.containsValue(buf)) {
-            buf.busy = false;
+            buf.state = DBuffer.BufferState.FREE;
+            this.notifyAll();
         }
-        this.notifyAll();
         // does a signal go here?
     }
 
