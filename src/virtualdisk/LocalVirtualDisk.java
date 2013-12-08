@@ -49,7 +49,7 @@ public class LocalVirtualDisk extends VirtualDisk {
         // add request to our queue
         requestQueue.add(new IORequest(buf, operation));
     }
-    private void processRequests() throws IOException {
+    private synchronized void processRequests() throws IOException {
         while(!requestQueue.isEmpty()) {
             IORequest request = requestQueue.poll();
             DBuffer buf = request.buffer;
@@ -61,6 +61,7 @@ public class LocalVirtualDisk extends VirtualDisk {
             	this.writeBlock(buf);
                 buf.isClean = true;
             }
+            //this.notifyAll();
             buf.ioComplete();
         }
     }

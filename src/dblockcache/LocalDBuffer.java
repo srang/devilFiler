@@ -49,8 +49,9 @@ public class LocalDBuffer extends DBuffer {
 
     @Override
     public boolean waitValid() {
+		//this.isValid = true;
     	while (!this.isValid){
-			try {
+    		try {
 				this.wait();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -111,7 +112,7 @@ public class LocalDBuffer extends DBuffer {
     }
     // upcall from VirtualDisk
     @Override
-    public void ioComplete() {
+    public synchronized void ioComplete() {
     	state = BufferState.HELD;
     	this.notifyAll();
     }
