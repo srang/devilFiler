@@ -1,64 +1,81 @@
 package dblockcache;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 // stores a list of DBuffers in-memory
-public class LocalDBufferCache extends DBufferCache{
+public class LocalDBufferCache extends DBufferCache {
 
-    private LinkedHashMap<Integer, CacheEntry> buffers;
+    private Map<Integer, DBuffer> buffers;
+    private Queue<Integer> lru;
+    private int cacheSize;
+
     public LocalDBufferCache(final int cacheSize) {// cache size is the number of DBuffers or blocks
         super(cacheSize);
-        buffers = new LinkedHashMap<Integer, CacheEntry>(cacheSize, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<Integer, CacheEntry> eldest) {
-                // When to remove the eldest buffer
-                // extra eviction logic about being pinned or held should go here
-
-            		return size() > cacheSize; // Size exceeded the max allowed.
-            }
-        };
+        buffers = new HashMap<Integer, DBuffer>();
+        lru = new LinkedList<Integer>();
+        this.cacheSize = cacheSize;
     }
 
     @Override
     public synchronized DBuffer getBlock(int blockID) {
         if (buffers.containsKey(blockID)) {
-            CacheEntry entry = buffers.get(blockID);
-            entry.buffer.busy = true; // held until released
-            return entry.buffer;
+            DBuffer entry = buffers.get(blockID);
+            entry.busy = true; // held until released
+            // existing blocks should be moved to the back of the queue
+            moveToBack(blockID);
+            return entry;
         }
         LocalDBuffer buff = new LocalDBuffer();
-        buffers.put(blockID,new CacheEntry(buff));
-        buff.isValid = false;
+        buff.isValid = false; // this should be initialized in constructor
         buff.busy = true; // held until released
+        if (buffers.size() == cacheSize){
+            evict();
+        }
+
+        buffers.put(blockID, buff);
+        lru.add(blockID); // new blocks have been most recently access
+
         return buff;
     }
-    // this may no longer need to be explicitly called.
+    // evict the least recently used block this is not busy
+    private void evict() {
+        Iterator<Integer> iterator = lru.iterator();
+        while (iterator.hasNext()) {
+            int current = iterator.next();
+            if(!buffers.get(current).isBusy()){
+                iterator.remove();
+                buffers.remove(current);
+                return;
+            }
+        }
+    }
+
+    private void moveToBack(int blockID) {
+        if (lru.contains(blockID)) {
+            lru.remove(blockID);
+        }
+        lru.add(blockID);
+    }
+
     @Override
     public synchronized void releaseBlock(DBuffer buf) {
-    	if (this.buffers.containsValue(buf))
-    		buf.busy = false;
-    		this.notifyAll();
-    	// does a signal go here?
+        if (this.buffers.containsValue(buf)) {
+            buf.busy = false;
+        }
+        this.notifyAll();
+        // does a signal go here?
     }
 
     @Override
     public synchronized void sync() {
         // write dirty data to disk
-    	for (int i = 0; i<this.buffers.size(); i++){
-    		if(!this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.isClean){
-    			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.startPush();
-    			this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.waitClean(); // is this wait appropriate here?
-    			// some kind of signal here
-    		}
-    	}
-    }
-
-    private static class CacheEntry {
-        private LocalDBuffer buffer;
-
-        private CacheEntry(LocalDBuffer buffer) {
-            this.buffer = buffer;
+        for (int i = 0; i < this.buffers.size(); i++) {
+            if (!this.buffers.get(this.buffers.keySet().toArray()[i]).isClean) {
+                this.buffers.get(this.buffers.keySet().toArray()[i]).startPush();
+                this.buffers.get(this.buffers.keySet().toArray()[i]).waitClean(); // is this wait appropriate here?
+                // some kind of signal here
+            }
         }
     }
+
 }
