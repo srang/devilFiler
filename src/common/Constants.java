@@ -19,6 +19,7 @@ public class Constants {
 	public static final int NUM_OF_CACHE_BLOCKS = 65536; // 2^16
 	public static final int MAX_FILE_SIZE = BLOCK_SIZE*500; // Constraint on the max file size
 	public static final int BLOCK_ADDRESS_SIZE = 4; // 
+	public static final int BYTE_OFFSET = 256; // Used for incrementing file_ids with inode index
 
 	public static final int MAX_DFILES = 512; // For recylcing DFileIDs
 

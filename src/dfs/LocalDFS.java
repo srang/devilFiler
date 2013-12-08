@@ -37,7 +37,7 @@ public class LocalDFS extends DFS {
         
         
         for (int i = 0; i < Constants.MAX_DFILES; i++) {
-            freeFileIDs.add(i);
+            freeFileIDs.add(i * Constants.BYTE_OFFSET);
         }
         
         for (int j = 0; j < (Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE); j++){
