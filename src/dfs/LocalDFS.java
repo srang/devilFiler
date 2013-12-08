@@ -18,6 +18,8 @@ public class LocalDFS extends DFS {
     private Queue<Inode> freeINodes;
     private Set<Inode> usedINodes;
 
+    private Queue<Integer> freeBlocks;
+    private Set<Integer> usedBlocks;
     @Override
     public void init() {
         dfiles = new ArrayList<DFileID>(Constants.MAX_DFILES);
@@ -27,13 +29,17 @@ public class LocalDFS extends DFS {
         usedINodes = new HashSet<Inode>();
         freeINodes = new LinkedList<Inode>();
         
+        usedBlocks = new HashSet<Integer>();
+        freeBlocks = new LinkedList<Integer>();
+        
+        
         for (int i = 0; i < Constants.MAX_DFILES; i++) {
             freeFileIDs.add(i);
         }
         
         for (int j = 0; j < (Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE); j++){
         	((LinkedList<Inode>) freeINodes).addFirst(new Inode());
-        	for(int k = 0; k<Constants.NUM_OF_BLOCKS; k++){
+        	for(int k = 0; k<Constants.MAX_DFILES; k++){
         		for(int m = 0; m<(Constants.BLOCK_SIZE/Constants.INODE_SIZE); m++){
         			freeINodes.peek().setBlockID(k);
         			freeINodes.peek().setOffset(Constants.INODE_SIZE*m);
@@ -41,6 +47,9 @@ public class LocalDFS extends DFS {
         	}
         }
         
+        for(int n = 0; n<(Constants.NUM_OF_BLOCKS-(Constants.INODE_SIZE*(this.usedINodes.size()+this.freeINodes.size()))); n++){
+        	freeBlocks.add(n);
+        }
     }
 
     @Override
@@ -62,8 +71,19 @@ public class LocalDFS extends DFS {
 
     @Override
     public void destroyDFile(DFileID dFID) {
-        for (int i = 0; i<dFID.getINodeList().size(); i++){
+
+    	for (int i = 0; i<dFID.getINodeList().size(); i++){
         	Inode hold = dFID.getINodeList().get(i);
+        	// memory block freeing
+        	for (int j = 0; j<hold.getBlockMap().size(); j++){
+        		usedBlocks.remove(hold.getBlockMap().get(j));
+        		freeBlocks.add(hold.getBlockMap().get(j));
+        	}
+        	// disassociate all blocks with this iNode
+        	for(int k = 0; k<hold.getBlockMap().size(); k++){
+        		hold.getBlockMap().remove(hold.getBlockMap().get(0));
+        	}
+        	// remove iNodes from respective spots
         	usedINodes.remove(hold);
         	freeINodes.add(hold);
         	dFID.getINodeList().remove(hold);
@@ -106,7 +126,12 @@ public class LocalDFS extends DFS {
     	for (int j = 0; j<fileINodes.size(); j++){
     		for (int i = 0; i<fileINodes.get(j).getBlockMap().size(); i++){
         		_cache.getBlock(fileINodes.get(j).getBlockMap().get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
-        	}
+        		// allocate block as used -- is this right?
+        		if (freeBlocks.contains(fileINodes.get(j).getBlockMap().get(i))){
+        			usedBlocks.add(fileINodes.get(j).getBlockMap().get(i));
+        			freeBlocks.remove(fileINodes.get(j).getBlockMap().get(i));
+        		}
+    		}
     	}
     	dFID.fileSize = (expandFile) ? count : dFID.fileSize;
     	return 0;

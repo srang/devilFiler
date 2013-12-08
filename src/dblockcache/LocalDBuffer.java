@@ -27,6 +27,7 @@ public class LocalDBuffer extends DBuffer {
 
     @Override
     public void startPush() {
+    	this.isClean = true;
     	try {
 			disk.startRequest(this, DiskOperationType.WRITE);
 		} catch (IllegalArgumentException e) {
@@ -91,10 +92,20 @@ public class LocalDBuffer extends DBuffer {
     @Override
     public int write(byte[] buffer, int startOffset, int count) {
         this.busy = true; // pinned until ioComplete
+        if (this.buffer ==null){
+        	this.buffer = new byte[count];// initialize the buffer if no previous writes
+        }else{
+        	byte[] hold = new byte[this.buffer.length+count];
+        	for(int j = 0; j<this.buffer.length; j++){
+        		hold[j] = this.buffer[j];
+        	}
+        	this.buffer = hold;// add on and expand buffer if subsequent write
+        }
         for(int i = 0; i<count; i++) {
-        	buffer[startOffset+i] = buffer[startOffset+i];
+        	this.buffer[startOffset+i] = buffer[startOffset+i];
         }
         this.isClean = false; // mark as dirty
+        // mark as valid and notify?
     	return 0;
     }
     // upcall from VirtualDisk

@@ -21,7 +21,7 @@ public class LocalDBufferCache extends DBufferCache{
     }
 
     @Override
-    public DBuffer getBlock(int blockID) {
+    public synchronized DBuffer getBlock(int blockID) {
         if (buffers.containsKey(blockID)) {
             CacheEntry entry = buffers.get(blockID);
             entry.buffer.busy = true; // held until released
@@ -35,7 +35,7 @@ public class LocalDBufferCache extends DBufferCache{
     }
     // this may no longer need to be explicitly called.
     @Override
-    public void releaseBlock(DBuffer buf) {
+    public synchronized void releaseBlock(DBuffer buf) {
     	if (this.buffers.containsValue(buf))
     		buf.busy = false;
     		this.notifyAll();
@@ -43,7 +43,7 @@ public class LocalDBufferCache extends DBufferCache{
     }
 
     @Override
-    public void sync() {
+    public synchronized void sync() {
         // write dirty data to disk
     	for (int i = 0; i<this.buffers.size(); i++){
     		if(!this.buffers.get(this.buffers.keySet().toArray()[i]).buffer.isClean){
