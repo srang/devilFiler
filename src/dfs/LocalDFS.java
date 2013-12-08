@@ -43,8 +43,9 @@ public class LocalDFS extends DFS {
 
         initInodes();
 
-        for(int n = 0; n<(Constants.NUM_OF_BLOCKS-(Constants.INODE_SIZE*(this.usedINodes.size()+this.freeINodes.size()))); n++){
-        	freeBlocks.add(n);
+        // our free blocks start after the inode region
+        for (int n = Constants.INODE_REGION_SIZE + 1; n < Constants.NUM_OF_BLOCKS; n++) {
+            freeBlocks.add(n);
         }
 
         // init virtual disk
