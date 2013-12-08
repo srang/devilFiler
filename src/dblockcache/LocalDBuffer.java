@@ -4,17 +4,17 @@ import java.io.IOException;
 
 import common.Constants;
 import common.Constants.DiskOperationType;
-import virtualdisk.LocalVirtualDisk;
+import virtualdisk.VirtualDisk;
 
 public class LocalDBuffer extends DBuffer {
     // a DBuffer is an abstraction over a byte array and block id
-	private LocalVirtualDisk disk;
+	private VirtualDisk disk;
 	private int blockID;
 	private byte[] _buffer;
 	
-	public LocalDBuffer() {
+	public LocalDBuffer(VirtualDisk disk) {
 		_buffer = new byte[Constants.BLOCK_SIZE];
-		
+	    this.disk = disk;
 	}
 	
 	@Override

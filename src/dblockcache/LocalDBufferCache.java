@@ -1,5 +1,7 @@
 package dblockcache;
 
+import virtualdisk.VirtualDisk;
+
 import java.util.*;
 
 // stores a list of DBuffers in-memory
@@ -8,12 +10,13 @@ public class LocalDBufferCache extends DBufferCache {
     private Map<Integer, DBuffer> buffers;
     private Queue<Integer> lru;
     private int cacheSize;
-
-    public LocalDBufferCache(final int cacheSize) {// cache size is the number of DBuffers or blocks
+    private VirtualDisk disk;
+    public LocalDBufferCache(final int cacheSize, VirtualDisk disk) {// cache size is the number of DBuffers or blocks
         super(cacheSize);
         buffers = new HashMap<Integer, DBuffer>();
         lru = new LinkedList<Integer>();
         this.cacheSize = cacheSize;
+        this.disk = disk;
     }
 
     @Override
@@ -25,7 +28,7 @@ public class LocalDBufferCache extends DBufferCache {
             moveToBack(blockID);
             return entry;
         }
-        LocalDBuffer buff = new LocalDBuffer();
+        DBuffer buff = new LocalDBuffer(disk);
         buff.isValid = false; // this should be initialized in constructor
         buff.state = DBuffer.BufferState.HELD; // held until released
         if (buffers.size() == cacheSize){
