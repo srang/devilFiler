@@ -39,17 +39,9 @@ public class LocalDFS extends DFS {
         for (int i = 0; i < Constants.MAX_DFILES; i++) {
             freeFileIDs.add(i << 8);//shift bits over to allow for inode index
         }
-        
-        for (int j = 0; j < (Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE); j++){
-        	((LinkedList<Inode>) freeINodes).addFirst(new Inode());
-        	for(int k = 0; k<Constants.MAX_DFILES; k++){
-        		for(int m = 0; m<(Constants.BLOCK_SIZE/Constants.INODE_SIZE); m++){
-        			freeINodes.peek().setBlockID(k);
-        			freeINodes.peek().setOffset(Constants.INODE_SIZE*m);
-        		}
-        	}
-        }
-        
+
+        initInodes();
+
         for(int n = 0; n<(Constants.NUM_OF_BLOCKS-(Constants.INODE_SIZE*(this.usedINodes.size()+this.freeINodes.size()))); n++){
         	freeBlocks.add(n);
         }
@@ -60,6 +52,26 @@ public class LocalDFS extends DFS {
             _cache = new LocalDBufferCache(Constants.NUM_OF_CACHE_BLOCKS, disk);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void initInodes() {
+        int maxNumberOfInodes = Constants.BLOCK_SIZE/Constants.INODE_SIZE * Constants.INODE_REGION_SIZE;
+        int blockIndex = 1;
+        int blockOffset = 0;
+        for (int i = 0; i < maxNumberOfInodes; i++) {
+            Inode newInode = new Inode();
+            newInode.setBlockID(blockIndex); // assign the inode a block
+            newInode.setOffset(blockOffset);// assign the inode an offset within the block
+            // if we are past the end of a block, go to the next one
+            if (blockOffset + Constants.INODE_SIZE >= Constants.BLOCK_SIZE) {
+                blockOffset = 0;
+                blockIndex++;
+            } else {
+                blockOffset += Constants.INODE_SIZE;
+            }
+
+            freeINodes.add(newInode);
         }
     }
 

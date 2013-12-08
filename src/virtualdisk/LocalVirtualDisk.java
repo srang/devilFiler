@@ -13,16 +13,35 @@ public class LocalVirtualDisk extends VirtualDisk {
     public LocalVirtualDisk(String volName, boolean format) throws FileNotFoundException, IOException {
         super(volName, format);
         requestQueue = new LinkedList<IORequest>();
+        this.start();
     }
 
     public LocalVirtualDisk(boolean format) throws FileNotFoundException, IOException {
         super(format);
         requestQueue = new LinkedList<IORequest>();
+        this.start();
     }
 
     public LocalVirtualDisk() throws FileNotFoundException, IOException {
         super();
         requestQueue = new LinkedList<IORequest>();
+        this.start();
+    }
+
+    private void start() {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        processRequests();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t.start();
     }
 
     @Override
@@ -30,7 +49,7 @@ public class LocalVirtualDisk extends VirtualDisk {
         // add request to our queue
         requestQueue.add(new IORequest(buf, operation));
     }
-    private void processRequests() throws IOException {
+    private synchronized void processRequests() throws IOException {
         while(!requestQueue.isEmpty()) {
             IORequest request = requestQueue.poll();
             DBuffer buf = request.buffer;
@@ -42,6 +61,7 @@ public class LocalVirtualDisk extends VirtualDisk {
             	this.writeBlock(buf);
                 buf.isClean = true;
             }
+            //this.notifyAll();
             buf.ioComplete();
         }
     }
