@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import dblockcache.DBuffer;
 import dblockcache.DBufferCache;
 import dblockcache.LocalDBufferCache;
 import virtualdisk.LocalVirtualDisk;
@@ -142,8 +143,8 @@ public class LocalDFS extends DFS {
     	 */
     	int num_blocks_needed = (count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE;
     	int num_blocks_have   = (dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE;
-    	int num_inodes_needed = ((dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2);
-    	int num_inodes_have   = ((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2);
+    	int num_inodes_needed = ((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.BLOCK_ADDRESSES_PER_INODE);
+    	int num_inodes_have   = ((dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.BLOCK_ADDRESSES_PER_INODE);
     	if(expandFile) {//need another block 
     		dFID.fileSize = count;
     		if(num_inodes_needed > num_inodes_have){//need more inodes & blocks
@@ -197,49 +198,40 @@ public class LocalDFS extends DFS {
     	this._cache.sync();
     }
     
-    private void updateFileDes(DFileID id) {
-    	byte[] buff = new byte[id.getINodeList().size()*Constants.INODE_SIZE];
+    private void updateFileDes(DFileID id) {   	
+    	DBuffer dbuffer = _cache.getBlock(id.getINodeList().get(0).getBlockID());
     	for(int i = 0; i < id.getINodeList().size(); i++) {
+    		byte[] buff = new byte[Constants.INODE_SIZE];
     		Inode node = id.getINodeList().get(i);
+    		if(i > 0) {
+    			dbuffer = _cache.getBlock(node.getBlockID());
+    		}
     		int inodeIndexedFileID = node.getFileID()+i;
-    		byte[] address = ByteBuffer.allocate(4).putInt(inodeIndexedFileID).array();
-    		for(int j = 0; j < address.length; j++) {
-    			buff[i*Constants.INODE_SIZE+j] = address[j];//writing out fileID with the inode index
+    		byte[] FID = ByteBuffer.allocate(4).putInt(inodeIndexedFileID).array();
+    		for(int j = 0; j < FID.length; j++) {
+    			buff[j] = FID[j];//writing out fileID with the inode index
     		}
     		byte[] size = ByteBuffer.allocate(4).putInt(node.getInodeSize()).array();
     		for(int j = 0; j < size.length; j++) {
-    			buff[i*Constants.INODE_SIZE+ j + Constants.BLOCK_ADDRESS_SIZE] = size[j];//writing out size in bytes
+    			buff[j + Constants.BLOCK_ADDRESS_SIZE] = size[j];//writing out size in bytes
     		} 
     		ArrayList<Integer> blockMap = node.getBlockMap();
-    		for(int x = 0; x < blockMap.size(); x++) {
-    			int blockAddress = blockMap.get(x);
-    			byte[] byteBlockAddress = ByteBuffer.allocate(4).putInt(blockAddress).array();
-    			for(int j = 0; j < byteBlockAddress.length; j++) {
-    				buff[i*Constants.INODE_SIZE + j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE] = byteBlockAddress[j];
+    		for(int x = 0; x < Constants.BLOCK_ADDRESSES_PER_INODE; x++) {
+    			if(x < blockMap.size()) {
+    				int blockAddress = blockMap.get(x);
+    				byte[] byteBlockAddress = ByteBuffer.allocate(4).putInt(blockAddress).array();
+    				for(int j = 0; j < byteBlockAddress.length; j++) {
+    					buff[j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE] = byteBlockAddress[j];
+    				}
+    			} else {
+    				byte[] zeros = {0, 0, 0, 0};
+    				for(int j = 0; j < zeros.length; j++) {
+    					buff[j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE] = zeros[j];
+    				}
     			}
     		}
+    		dbuffer.write(buff, node.getOffset(), buff.length);  		
     	}
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    	_cache.releaseBlock(dbuffer);
+    }   
 }
