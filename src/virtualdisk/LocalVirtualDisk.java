@@ -37,8 +37,10 @@ public class LocalVirtualDisk extends VirtualDisk {
             // we pass in the DBuffer, and the requested operation
             if(request.operation == Constants.DiskOperationType.READ) {
                 this.readBlock(buf);
+                buf.isValid = true;
             } else if (request.operation == Constants.DiskOperationType.WRITE) {
                 this.writeBlock(buf);
+                buf.isClean = true;
             }
             buf.ioComplete();
         }
