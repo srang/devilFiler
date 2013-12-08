@@ -11,7 +11,7 @@ public class DFileID {
 
 	public DFileID(int dFID) {
 		_dFID = dFID;
-		_inode = new Inode();
+		inode = new ArrayList<Inode>();
 	}
 
 	public int getDFileID() {
