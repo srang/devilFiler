@@ -39,19 +39,15 @@ public class LocalDFS extends DFS {
         for (int i = 0; i < Constants.MAX_DFILES; i++) {
             freeFileIDs.add(i * Constants.BYTE_OFFSET);
         }
-        int maxNumberOfInodes = Math.ceil(Constants.MAX_DFILES/
+        
         for (int j = 0; j < (Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE); j++){
-//        	((LinkedList<Inode>) freeINodes).addFirst(new Inode());
-            Inode newInode = new Inode();
-            newInode.setBlockID(j);
-//        	for(int k = 0; k<Constants.MAX_DFILES; k++){
-//        		for(int m = 0; m<(Constants.BLOCK_SIZE/Constants.INODE_SIZE); m++){
-//                    newInode.setBlockID(k);
-//        			freeINodes.peek().setBlockID(k);
-//        			freeINodes.peek().setOffset(Constants.INODE_SIZE*m);
-//        		}
-//        	}
-            freeINodes.add(newInode);
+        	((LinkedList<Inode>) freeINodes).addFirst(new Inode());
+        	for(int k = 0; k<Constants.MAX_DFILES; k++){
+        		for(int m = 0; m<(Constants.BLOCK_SIZE/Constants.INODE_SIZE); m++){
+        			freeINodes.peek().setBlockID(k);
+        			freeINodes.peek().setOffset(Constants.INODE_SIZE*m);
+        		}
+        	}
         }
         
         for(int n = 0; n<(Constants.NUM_OF_BLOCKS-(Constants.INODE_SIZE*(this.usedINodes.size()+this.freeINodes.size()))); n++){

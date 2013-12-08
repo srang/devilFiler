@@ -16,14 +16,6 @@ public class SimpleTest {
 		for(int i = 0; i < 3; i++) {
 			System.out.println(out[i]);
 		}
-
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-
-            }
-        });
-    }
+	}
 
 }
