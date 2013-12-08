@@ -2,8 +2,8 @@ package dblockcache;
 
 import java.io.IOException;
 
+import common.Constants;
 import common.Constants.DiskOperationType;
-
 import virtualdisk.LocalVirtualDisk;
 
 public class LocalDBuffer extends DBuffer {
@@ -91,8 +91,18 @@ public class LocalDBuffer extends DBuffer {
     @Override
     public int write(byte[] buffer, int startOffset, int count) {
         this.busy = true; // pinned until ioComplete
-        // while(writing)
-        //		this.isValid = false;
+        for(int i = 0; i<count; i++) {
+        	buffer[startOffset+i] = buffer[startOffset+i];
+        }
+        try {
+			disk.startRequest(this, Constants.DiskOperationType.WRITE);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         this.isClean = false; // mark as dirty
     	return 0;
     }

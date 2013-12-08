@@ -6,20 +6,20 @@ import java.util.ArrayList;
 public class DFileID {
 
 	private int _dFID;
-	public ArrayList<Inode> inode;
+	public ArrayList<Inode> inodeList;
 	public int fileSize;
 
 	public DFileID(int dFID) {
 		_dFID = dFID;
-		_inode = new Inode();
+		inodeList = new ArrayList<Inode>();
 	}
 
 	public int getDFileID() {
 		return _dFID;
 	}
 	
-	public ArrayList<Inode> getINode(){
-		return this.inode;
+	public ArrayList<Inode> getINodeList(){
+		return this.inodeList;
 	}
 	    
 	public boolean equals(Object other){
