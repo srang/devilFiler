@@ -37,7 +37,7 @@ public class LocalDFS extends DFS {
         
         
         for (int i = 0; i < Constants.MAX_DFILES; i++) {
-            freeFileIDs.add(i * Constants.BYTE_OFFSET);
+            freeFileIDs.add(i << 8);//shift bits over to allow for inode index
         }
 
         initInodes();
@@ -85,9 +85,9 @@ public class LocalDFS extends DFS {
         
         Inode inode = freeINodes.poll();
         usedINodes.add(inode);
-        Inode fileCopy = inode;
-        fileCopy.setfileID(newDfile);
-        newDfile.getINodeList().add(fileCopy);
+        inode.setfileID(newDfile);
+        newDfile.getINodeList().add(inode);
+        updateDiskINodes(inode);
         
         return newDfile;
         // associate with first iNode, make set of inodes to work with
@@ -139,22 +139,38 @@ public class LocalDFS extends DFS {
     	/*
     	 * Following section assumes (x+n-1)/n = ceil(x/n)
     	 */
-    	if(expandFile && (dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE < (count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE) {//need another block 
-    		if(((dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2)>
-    		((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2)){
-    			fileINodes.add(freeINodes.poll());
-    		}
-    		fileINodes.get(fileINodes.size()-1).add(freeBlocks.poll());
+    	int num_blocks_needed = (count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE;
+    	int num_blocks_have   = (dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE;
+    	int num_inodes_needed = ((dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2);
+    	int num_inodes_have   = ((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.INODE_SIZE/Constants.BLOCK_ADDRESS_SIZE-2);
+    	if(expandFile) {//need another block 
+    		if(num_inodes_needed > num_inodes_have){//need more inodes & blocks
+    			for(int i = 0; i < (num_inodes_needed-num_inodes_have); i++) {
+    				Inode inode = freeINodes.poll();
+    				usedINodes.add(inode);
+    				inode.setfileID(dFID);
+    				fileINodes.add(inode);
+    				for(int j = 0; j < Constants.BLOCK_ADDRESSES_PER_INODE; j++) {
+    					int bID = freeBlocks.poll();
+    		    		usedBlocks.add(bID);
+    		    		fileINodes.get(fileINodes.size()-1).add(bID);	
+    				}
+    				updateDiskINodes(fileINodes.get(fileINodes.size()-1));
+    			}
+    		} else if(num_blocks_needed > num_blocks_have){//just need more blocks
+    			for(int i = 0; i < num_blocks_needed-num_blocks_have; i++) {
+    	   			int bID = freeBlocks.poll();
+            		usedBlocks.add(bID);
+            		fileINodes.get(fileINodes.size()-1).add(bID);
+    			}
+    			updateDiskINodes(fileINodes.get(fileINodes.size()-1));
+    		}    		
     	}
     	
     	for (int j = 0; j<fileINodes.size(); j++){
-    		for (int i = 0; i<fileINodes.get(j).getBlockMap().size(); i++){
-        		_cache.getBlock(fileINodes.get(j).getBlockMap().get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
-        		// allocate block as used -- is this right?
-        		if (freeBlocks.contains(fileINodes.get(j).getBlockMap().get(i))){
-        			usedBlocks.add(fileINodes.get(j).getBlockMap().get(i));
-        			freeBlocks.remove(fileINodes.get(j).getBlockMap().get(i));
-        		}
+    		ArrayList<Integer> fileBlockMap = fileINodes.get(j).getBlockMap();
+    		for (int i = 0; i<fileBlockMap.size(); i++){
+        		_cache.getBlock(fileBlockMap.get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
     		}
     	}
     	dFID.fileSize = (expandFile) ? count : dFID.fileSize;
@@ -173,6 +189,12 @@ public class LocalDFS extends DFS {
 
     @Override
     public void sync() {
+    	
     	this._cache.sync();
+    }
+    
+    private void updateDiskINodes(Inode i) {
+    	_cache.getBlock(i.getBlockID());
+    	//byte[] inodeInfo = new byte[]
     }
 }

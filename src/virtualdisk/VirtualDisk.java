@@ -71,7 +71,11 @@ public abstract class VirtualDisk implements IVirtualDisk {
 	 * Attempts to rebuild DFS from a disk file. ***Checks for file corruption 
 	 */
 	private void rebuild() {
-		byte[] b = new byte[Constants.BLOCK_SIZE];
+		for(int i = 0; i < Constants.INODE_REGION_SIZE; i++) {
+			//Read in blocks
+			//create files
+			//make money get paid
+		}
 	}
 	
 	/*
