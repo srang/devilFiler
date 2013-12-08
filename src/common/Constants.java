@@ -23,6 +23,8 @@ public class Constants {
 
 	public static final int MAX_DFILES = 512; // For recylcing DFileIDs
 
+	public static final int INODE_REGION_SIZE = MAX_DFILES * (MAX_FILE_SIZE/BLOCK_SIZE); // Memory blocks
+	
 	/* DStore Operation types */
 	public enum DiskOperationType {
 		READ, WRITE

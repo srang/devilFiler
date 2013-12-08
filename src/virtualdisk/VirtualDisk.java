@@ -68,10 +68,10 @@ public abstract class VirtualDisk implements IVirtualDisk {
 			IOException;
 	
 	/*
-	 * 
+	 * Attempts to rebuild DFS from a disk file. ***Checks for file corruption 
 	 */
 	private void rebuild() {
-		
+		byte[] b = new byte[Constants.BLOCK_SIZE];
 	}
 	
 	/*
