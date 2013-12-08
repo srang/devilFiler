@@ -12,8 +12,9 @@ public class LocalDBuffer extends DBuffer {
 	private int blockID;
 	private byte[] _buffer;
 	
-	public LocalDBuffer(VirtualDisk disk) {
+	public LocalDBuffer(int blockID, VirtualDisk disk) {
 		_buffer = new byte[Constants.BLOCK_SIZE];
+        this.blockID = blockID;
 	    this.disk = disk;
 	}
 	
