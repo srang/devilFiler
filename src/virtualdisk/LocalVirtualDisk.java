@@ -55,10 +55,10 @@ public class LocalVirtualDisk extends VirtualDisk {
             DBuffer buf = request.buffer;
             // we pass in the DBuffer, and the requested operation
             if(request.operation == Constants.DiskOperationType.READ) {
-                this.readBlock(buf);
+            	this.readBlock(buf);
                 buf.isValid = true;
             } else if (request.operation == Constants.DiskOperationType.WRITE) {
-                this.writeBlock(buf);
+            	this.writeBlock(buf);
                 buf.isClean = true;
             }
             buf.ioComplete();
