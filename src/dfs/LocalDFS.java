@@ -4,10 +4,13 @@ import common.Constants;
 import common.DFileID;
 import common.Inode;
 
+import java.io.IOException;
 import java.util.*;
 
 import dblockcache.DBufferCache;
 import dblockcache.LocalDBufferCache;
+import virtualdisk.LocalVirtualDisk;
+import virtualdisk.VirtualDisk;
 
 public class LocalDFS extends DFS {
     private List<DFileID> dfiles;
@@ -49,6 +52,14 @@ public class LocalDFS extends DFS {
         
         for(int n = 0; n<(Constants.NUM_OF_BLOCKS-(Constants.INODE_SIZE*(this.usedINodes.size()+this.freeINodes.size()))); n++){
         	freeBlocks.add(n);
+        }
+
+        // init virtual disk
+        try {
+            VirtualDisk disk = new LocalVirtualDisk();
+            _cache = new LocalDBufferCache(Constants.NUM_OF_CACHE_BLOCKS, disk);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
