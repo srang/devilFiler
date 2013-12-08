@@ -82,9 +82,9 @@ public class LocalDBuffer extends DBuffer {
     @Override
     public int read(byte[] buffer, int startOffset, int count) {
     	this.busy = true; // pinned until ioComplete
-    	//if (!this.checkValid())
-    	// this.waitValid()
-    	//	read
+    	if (!this.checkValid())
+    		this.waitValid();
+    	this.startFetch();
     	return 0;
     }
 
@@ -94,15 +94,6 @@ public class LocalDBuffer extends DBuffer {
         for(int i = 0; i<count; i++) {
         	buffer[startOffset+i] = buffer[startOffset+i];
         }
-        try {
-			disk.startRequest(this, Constants.DiskOperationType.WRITE);
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
         this.isClean = false; // mark as dirty
     	return 0;
     }
