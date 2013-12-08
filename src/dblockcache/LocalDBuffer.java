@@ -48,7 +48,7 @@ public class LocalDBuffer extends DBuffer {
     }
 
     @Override
-    public boolean waitValid() {
+    public synchronized boolean waitValid() {
 		//this.isValid = true;
     	while (!this.isValid){
     		try {

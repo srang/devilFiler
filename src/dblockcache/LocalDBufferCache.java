@@ -35,6 +35,11 @@ public class LocalDBufferCache extends DBufferCache {
             evict();
         }
 
+        if (!buff.checkValid()) {// start our fetching
+            buff.startFetch();
+            buff.waitValid();
+        }
+
         buffers.put(blockID, buff);
         lru.add(blockID); // new blocks have been most recently access
 
