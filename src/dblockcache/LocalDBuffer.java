@@ -66,7 +66,7 @@ public class LocalDBuffer extends DBuffer {
     }
 
     @Override
-    public boolean waitClean() {
+    public synchronized boolean waitClean() {
     	while (!this.isClean){
     			try {
 					this.wait();

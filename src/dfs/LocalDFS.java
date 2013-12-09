@@ -200,7 +200,7 @@ public class LocalDFS extends DFS {
     	this._cache.sync();
     }
     
-    private void updateFileDes(DFileID id) {   	
+    private synchronized void updateFileDes(DFileID id) {   	
     	DBuffer dbuffer = _cache.getBlock(id.getINodeList().get(0).getBlockID());
     	for(int i = 0; i < id.getINodeList().size(); i++) {
     		byte[] buff = new byte[Constants.INODE_SIZE];
