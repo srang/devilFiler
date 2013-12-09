@@ -8,15 +8,15 @@
 
 	Name1: Sam Rang
 	NetId1: spr20
-	Time spent: 
+	Time spent: 20 hours
 
 	Name2: Brad Levergood
 	NetId2: brl8
-	Time spent: 
+	Time spent: 20 hours
 
 	Name3: Zach Michaelov
-	NetId3: 
-	Time spent: 
+	NetId3: zgm3
+	Time spent: 20 hours
 
 /******************
  * Files to submit
