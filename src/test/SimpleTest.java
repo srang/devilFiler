@@ -16,7 +16,7 @@ public class SimpleTest {
 	}
 	
 	public void run() {
-		File log = new File("SimpleTest.log");
+		File log = new File("Test.log");
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(log);
@@ -28,7 +28,8 @@ public class SimpleTest {
 		PrintStream ps = new PrintStream(fos); // switch these interchangeably for terminal and log-file output
 		System.setOut(ps);
 		
-		System.out.println("1. SimpleTest.java: test creation, writing to, and reading from two separate files\n");
+		System.out.println("1. SimpleTest.java: test file creation for two files, writing to single file twice, reading" +
+		"from two separate files, and file deletion for one file\n");
 		LocalDFS dfs = new LocalDFS();
 		dfs.init();
 		System.out.println("Create first file and write integers 12, 1, 3 to it, then read them out\n");
@@ -58,6 +59,19 @@ public class SimpleTest {
         dfs.read(c, out, 0, file1.length);
         System.out.println(new String(out));
         
+        System.out.println("\nAll DFileIDs in DFiler:");
+        for (DFileID dFileID : dfs.listAllDFiles()) {
+            System.out.println(dFileID);
+        }
+        System.out.println("\nDestroying the first DFileID");
+        dfs.destroyDFile(b);
+        
+        System.out.println("\nDFileIDs remaining in DFiler:");
+        for (DFileID dFileID : dfs.listAllDFiles()) {
+            System.out.println(dFileID);
+        }
+        
+        System.out.println("\nEnd of SimpleTest.java\n");
         ps.close();
         output.close();
         try {
