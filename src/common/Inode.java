@@ -15,7 +15,7 @@ public class Inode {
 	}
 	
 	public Inode (byte[] b) {
-		//Make inode from byte[]
+		
 	}
 	
 	// set methods
