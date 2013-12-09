@@ -16,6 +16,16 @@ public class SimpleTest {
 		for(int i = 0; i < 3; i++) {
 			System.out.println(out[i]);
 		}
-	}
+
+
+        DFileID c = dfs.createDFile();
+
+        byte[] file1 = "The quick brown fox jumped over the lazy dog".getBytes();
+        dfs.write(c, file1, 0, file1.length);
+        out = new byte[file1.length];
+        dfs.read(c, out, 0, file1.length);
+        System.out.println(new String(out));
+
+    }
 
 }
