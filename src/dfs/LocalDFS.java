@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import com.sun.corba.se.impl.orbutil.closure.Constant;
-
 import dblockcache.DBuffer;
 import dblockcache.DBufferCache;
 import dblockcache.LocalDBufferCache;
@@ -148,7 +146,7 @@ public class LocalDFS extends DFS {
     	int num_blocks_needed = (count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE;
     	int num_blocks_have   = (dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE;
     	int num_inodes_needed = ((count+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.BLOCK_ADDRESSES_PER_INODE);
-    	int num_inodes_have   = ((dFID.fileSize+Constants.BLOCK_SIZE-1)/Constants.BLOCK_SIZE)/(Constants.BLOCK_ADDRESSES_PER_INODE);
+    	int num_inodes_have   = dFID.getINodeList().size();
     	if(expandFile) {//need another block 
     		dFID.fileSize = count;
     		if(num_inodes_needed > num_inodes_have){//need more inodes & blocks
@@ -176,7 +174,9 @@ public class LocalDFS extends DFS {
     	for (int j = 0; j<fileINodes.size(); j++){
     		ArrayList<Integer> fileBlockMap = fileINodes.get(j).getBlockMap();
     		for (int i = 0; i<fileBlockMap.size(); i++){
-        		_cache.getBlock(fileBlockMap.get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));       		
+    			int intermed = (count < Constants.BLOCK_SIZE) ? count : Constants.BLOCK_SIZE;
+        		_cache.getBlock(dFID.getINodeList().get(j).getBlockMap().get(i)).write(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (intermed));
+        		count-=intermed;
     		}
     		if(j < fileINodes.size()-1) {//not the last mem_block 
     			fileINodes.get(j).setInodeSize(Constants.BLOCK_ADDRESSES_PER_INODE * Constants.BLOCK_SIZE);    			
@@ -204,6 +204,7 @@ public class LocalDFS extends DFS {
     
     private synchronized void updateFileDes(DFileID id) {   	
     	DBuffer dbuffer = _cache.getBlock(id.getINodeList().get(0).getBlockID());
+    	int remainingFileSize = id.fileSize;
     	for(int i = 0; i < id.getINodeList().size(); i++) {
     		byte[] buff = new byte[Constants.BLOCK_SIZE];
     		Inode node = id.getINodeList().get(i);
@@ -215,6 +216,9 @@ public class LocalDFS extends DFS {
     		for(int j = 0; j < FID.length; j++) {
     			buff[j + node.getOffset()] = FID[j];//writing out fileID with the inode index
     		}
+    		node.setInodeSize((remainingFileSize < Constants.BLOCK_ADDRESSES_PER_INODE*Constants.BLOCK_SIZE) ? 
+    				remainingFileSize : Constants.BLOCK_ADDRESSES_PER_INODE*Constants.BLOCK_SIZE);
+    		remainingFileSize-=node.getInodeSize();
     		byte[] size = ByteBuffer.allocate(4).putInt(node.getInodeSize()).array();
     		for(int j = 0; j < size.length; j++) {
     			buff[j + Constants.BLOCK_ADDRESS_SIZE + node.getOffset()] = size[j];//writing out size in bytes

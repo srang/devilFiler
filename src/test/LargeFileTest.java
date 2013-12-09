@@ -10,7 +10,7 @@ import java.util.List;
 public class LargeFileTest {
     public static void main(String[] args) {
         List<Integer> list = new ArrayList<Integer>();
-        File file = new File("/Users/zmichaelov/Projects/devilFiler/src/test/melville.txt");
+        File file = new File("src/test/melville.txt");
         BufferedReader reader = null;
         StringBuffer melville = new StringBuffer();
         try {

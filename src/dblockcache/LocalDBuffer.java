@@ -71,7 +71,6 @@ public class LocalDBuffer extends DBuffer {
     			try {
 					this.wait();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
     	}
@@ -92,7 +91,8 @@ public class LocalDBuffer extends DBuffer {
     	isValid = true;
     	state = BufferState.PINNED;
     	for(int i = 0; i < count; i++) {
-    		buffer[startOffset + i] = _buffer[startOffset + i]; 
+    		int y = startOffset%Constants.BLOCK_SIZE + i;
+    		buffer[startOffset + i] = _buffer[startOffset%Constants.BLOCK_SIZE + i]; 
     	}
     	state = BufferState.HELD;
     	this.notifyAll();
@@ -104,7 +104,7 @@ public class LocalDBuffer extends DBuffer {
     	this.isClean = false; // mark as dirty
     	state = BufferState.PINNED;
     	for(int i = 0; i < count; i++) {
-    		_buffer[startOffset + i] = buffer[startOffset + i];
+    		_buffer[startOffset%Constants.BLOCK_SIZE + i] = buffer[startOffset + i];
     	}
         state = BufferState.HELD;
         this.notifyAll();
