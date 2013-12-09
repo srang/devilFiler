@@ -2,6 +2,7 @@ package test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 
 import common.DFileID;
@@ -35,18 +36,26 @@ public class SimpleTest {
 
         DFileID c = dfs.createDFile();
         byte[] file1 = "The quick brown fox jumped over the lazy dog".getBytes();
-//        String str;
-//        try {
-//			Scanner s = new Scanner(new File("melville.txt"));
-//			str = s.
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+        String str = "";
+        try {
+			Scanner s = new Scanner(new File("src/test/melville.txt"));
+			while(s.hasNext()){
+				str += s.next();
+			}
+			System.out.println(str.length());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        byte[] file2 = str.getBytes();
+        DFileID file2ID = dfs.createDFile();
         dfs.write(c, file1, 0, file1.length);
+        dfs.write(file2ID, file2, 0, file2.length);
+        byte[] out2 = new byte[file2.length];
         out = new byte[file1.length];
         dfs.read(c, out, 0, file1.length);
+        dfs.read(file2ID, out2, 0, out2.length);
         System.out.println(new String(out));
+        System.out.println(new String(out2));
 
     }
 
