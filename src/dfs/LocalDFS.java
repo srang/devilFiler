@@ -128,7 +128,9 @@ public class LocalDFS extends DFS {
     	}    	
     	for (int j = 0; j<dFID.getINodeList().size(); j++){
     		for (int i = 0; i<dFID.getINodeList().get(j).getBlockMap().size(); i++){
-        		_cache.getBlock(dFID.getINodeList().get(j).getBlockMap().get(i)).read(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (count-(i*Constants.BLOCK_SIZE)));
+    			int intermed = (count < Constants.BLOCK_SIZE) ? count : Constants.BLOCK_SIZE;
+        		_cache.getBlock(dFID.getINodeList().get(j).getBlockMap().get(i)).read(buffer, (startOffset+(i*Constants.BLOCK_SIZE)), (intermed));
+        		count-=intermed;
         	}
     	}
     	return 0; // return statement?
@@ -214,7 +216,6 @@ public class LocalDFS extends DFS {
     		byte[] size = ByteBuffer.allocate(4).putInt(node.getInodeSize()).array();
     		for(int j = 0; j < size.length; j++) {
     			buff[j + Constants.BLOCK_ADDRESS_SIZE] = size[j];//writing out size in bytes
-    			System.out.print(size[j] + " ");
     		} 
     		ArrayList<Integer> blockMap = node.getBlockMap();
     		for(int x = 0; x < Constants.BLOCK_ADDRESSES_PER_INODE; x++) {
