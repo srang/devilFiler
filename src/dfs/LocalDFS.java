@@ -114,7 +114,7 @@ public class LocalDFS extends DFS {
     }
 
     @Override
-    public DFileID createDFile() {
+    public synchronized DFileID createDFile() {
         int fileId = freeFileIDs.poll();
         usedFileIDs.add(fileId);
         DFileID newDfile = new DFileID(fileId);
@@ -131,7 +131,7 @@ public class LocalDFS extends DFS {
     }
 
     @Override
-    public void destroyDFile(DFileID dFID) {
+    public synchronized void destroyDFile(DFileID dFID) {
 
     	for (int i = 0; i<dFID.getINodeList().size(); i++){
         	Inode hold = dFID.getINodeList().get(i);
@@ -172,7 +172,7 @@ public class LocalDFS extends DFS {
     }
 
     @Override
-    public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
+    public synchronized int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
     	boolean expandFile = dFID.fileSize < count;
     	ArrayList<Inode> fileINodes = dFID.getINodeList();
     	/*
@@ -237,7 +237,7 @@ public class LocalDFS extends DFS {
     	this._cache.sync();
     }
     
-    private synchronized void updateFileDes(DFileID id) {   	
+    private void updateFileDes(DFileID id) {
     	DBuffer dbuffer = _cache.getBlock(id.getINodeList().get(0).getBlockID());
     	int remainingFileSize = id.fileSize;
     	for(int i = 0; i < id.getINodeList().size(); i++) {
