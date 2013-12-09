@@ -8,7 +8,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LargeFileTest {
-    public static void main(String[] args) {
+	
+	public LargeFileTest(){
+		
+	}
+	public void run(){
+		File log = new File("LargeFileTest.log");
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(log);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		PrintStream output = System.out;
+		PrintStream ps = new PrintStream(fos); // switch these interchangeably for terminal and log-file output
+		System.setOut(ps);
+		
+		System.out.println("2. LargeFileTest.java: create a file and write a large text file to it (Bartelby the Scrivener)," +
+		"requiring it to use multiple blocks of memory, then read that file out \n");
         List<Integer> list = new ArrayList<Integer>();
         File file = new File("src/test/melville.txt");
         BufferedReader reader = null;
@@ -41,5 +59,14 @@ public class LargeFileTest {
         byte[] out = new byte[file1.length];
         dfs.read(c, out, 0, file1.length);
         System.out.println(new String(out));
+        
+        ps.close();
+        output.close();
+        try {
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }
