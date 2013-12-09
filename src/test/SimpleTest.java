@@ -33,7 +33,6 @@ public class SimpleTest {
 		PrintStream output = System.out;
 		PrintStream ps = new PrintStream(fos); // switch these interchangeably for terminal and log-file output
 		System.setOut(output);
-		
 		LocalDFS dfs = new LocalDFS();
 		dfs.init();
 		DFileID b = dfs.createDFile();

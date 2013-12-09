@@ -15,7 +15,7 @@ import virtualdisk.LocalVirtualDisk;
 import virtualdisk.VirtualDisk;
 
 public class LocalDFS extends DFS {
-    private List<DFileID> dfiles;
+    private DFileID[] dfiles;
     private Queue<Integer> freeFileIDs;
     private Set<Integer> usedFileIDs;
     private DBufferCache _cache;
@@ -27,7 +27,8 @@ public class LocalDFS extends DFS {
     private Set<Integer> usedBlocks;
     @Override
     public void init() {
-        dfiles = new ArrayList<DFileID>(Constants.MAX_DFILES);
+        dfiles = new DFileID[Constants.MAX_DFILES];
+        
         usedFileIDs = new HashSet<Integer>();
         freeFileIDs = new LinkedList<Integer>();
         
@@ -60,29 +61,32 @@ public class LocalDFS extends DFS {
     }
 
     private void rebuild() {
+    	System.out.println("Rebuilding....");
     	for(int i = 0; i < Constants.INODE_REGION_SIZE; i++) {
+    		System.out.println("READING BLOCK " + i);
     		DBuffer buff = _cache.getBlock(i + 1); //Ignore the first block but still read right num blocks
     		byte[] block = new byte[Constants.BLOCK_SIZE];
     		buff.read(block, 0, Constants.BLOCK_SIZE);
-    		for(int j = 0; j < Constants.BLOCK_SIZE/Constants.BLOCK_SIZE; j++) {//Inodes per block
+    		for(int j = 0; j < Constants.BLOCK_SIZE/Constants.INODE_SIZE; j++) {//Inodes per block
     			byte[] inodeBytes = new byte[Constants.INODE_SIZE];
-    			for(int x = 0; x < inodeBytes.length; i++) {
+    			for(int x = 0; x < inodeBytes.length; x++) {
     				inodeBytes[x] = block[j * Constants.INODE_SIZE + x];
     			}
     			Inode inode = new Inode(inodeBytes);
+    			System.out.println("BUILD INODE " + j);
     			int fid = inode.getFileID();
     			if(fid != 0) {
     				int inodeIndex = fid & 255;
     				int realFileID = (fid>>8)<<8;
-    				if(freeFileIDs.contains(realFileID)) {
-    					DFileID realID = dfiles.get(realFileID);
+    				if(!freeFileIDs.contains(realFileID)) {
+    					DFileID realID = dfiles[(realFileID>>8)-1];
     					realID.getINodeList().add(inodeIndex, inode);
     					inode.setfileID(realID);
     				} else {
     					freeFileIDs.remove(realFileID);
     					usedFileIDs.add(realFileID);
     					DFileID FID = new DFileID(realFileID);
-    					dfiles.add(realFileID, FID);
+    					dfiles[(realFileID>>8)-1] = FID;
     				}
     			}
     		}
@@ -114,7 +118,7 @@ public class LocalDFS extends DFS {
         int fileId = freeFileIDs.poll();
         usedFileIDs.add(fileId);
         DFileID newDfile = new DFileID(fileId);
-        dfiles.add(newDfile.getDFileID(), newDfile);;
+        dfiles[(newDfile.getDFileID()>>8)-1] = newDfile;
         
         Inode inode = freeINodes.poll();
         usedINodes.add(inode);
@@ -146,7 +150,7 @@ public class LocalDFS extends DFS {
         	dFID.getINodeList().remove(hold);
         }
     	
-    	this.dfiles.remove(dFID);
+    	this.dfiles[dFID.getDFileID()>>8-1] = null;
         this.usedFileIDs.remove(dFID); // file Id is no longer used
         this.freeFileIDs.add(dFID.getDFileID()); // let file descriptor be reused
     }
@@ -225,7 +229,7 @@ public class LocalDFS extends DFS {
 
     @Override
     public List<DFileID> listAllDFiles() {
-        return this.dfiles;
+        return new ArrayList<DFileID>(Arrays.asList(dfiles));
     }
 
     @Override
