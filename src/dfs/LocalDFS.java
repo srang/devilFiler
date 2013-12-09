@@ -232,7 +232,8 @@ public class LocalDFS extends DFS {
     				}
     			}
     		}
-    		dbuffer.write(buff, node.getOffset(), buff.length);  		
+    		dbuffer.write(buff, node.getOffset(), buff.length);  
+    		((LocalDBufferCache)_cache).sync(dbuffer);
     	}
     	_cache.releaseBlock(dbuffer);
     }   
