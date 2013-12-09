@@ -214,6 +214,7 @@ public class LocalDFS extends DFS {
     		byte[] size = ByteBuffer.allocate(4).putInt(node.getInodeSize()).array();
     		for(int j = 0; j < size.length; j++) {
     			buff[j + Constants.BLOCK_ADDRESS_SIZE] = size[j];//writing out size in bytes
+    			System.out.print(size[j] + " ");
     		} 
     		ArrayList<Integer> blockMap = node.getBlockMap();
     		for(int x = 0; x < Constants.BLOCK_ADDRESSES_PER_INODE; x++) {
