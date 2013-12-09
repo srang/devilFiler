@@ -27,7 +27,7 @@ public class Inode {
 
         // remaining bytes are block addresses
         blockMap = new ArrayList<Integer>();
-        for(int i = 8; i < b.length; i += 4) {
+        for(int i = 8; i < inodeSize*4 + 8; i += 4) {
             blockMap.add(byteBuffer.getInt(i));
         }
     }
