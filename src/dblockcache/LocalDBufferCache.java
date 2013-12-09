@@ -85,13 +85,4 @@ public class LocalDBufferCache extends DBufferCache {
         }
         this.notifyAll();
     }
-    
-    public synchronized void sync(DBuffer buff) {
-    	if(!buff.isClean) {
-    		buff.startPush();
-    		buff.waitClean();
-    	}
-    	this.notifyAll();
-    }
-
 }
