@@ -9,9 +9,16 @@ import dfs.DFS;
 public class Client implements Runnable {
     private DFS dfs;
     private byte[] data;
+    private int sleep = -1;
     public Client(DFS dfs, byte[] data) {
         this.dfs = dfs;
         this.data = data;
+    }
+
+    public Client(DFS dfs, byte[] data, int sleep) {
+        this.dfs = dfs;
+        this.data = data;
+        this.sleep = sleep;
     }
 
     @Override
@@ -19,11 +26,13 @@ public class Client implements Runnable {
 
         DFileID b = dfs.createDFile();
         dfs.write(b, data, 0, data.length);
-//        try {
-//            Thread.sleep(500);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        if (sleep != -1) {
+            try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         byte[] out = new byte[data.length];
         dfs.read(b, out, 0, out.length);
         System.out.println(new String(out));
