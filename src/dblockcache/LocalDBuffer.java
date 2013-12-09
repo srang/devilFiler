@@ -92,6 +92,9 @@ public class LocalDBuffer extends DBuffer {
     	state = BufferState.PINNED;
     	for(int i = 0; i < count; i++) {
     		int y = startOffset%Constants.BLOCK_SIZE + i;
+    		/*
+    		 * Start offset for the local buffer will be smaller than the passed in buffer
+    		 */
     		buffer[startOffset + i] = _buffer[startOffset%Constants.BLOCK_SIZE + i]; 
     	}
     	state = BufferState.HELD;
