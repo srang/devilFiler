@@ -10,6 +10,7 @@ public class Client implements Runnable {
     private DFS dfs;
     private byte[] data;
     private int sleep = -1;
+    private DFileID file;
     public Client(DFS dfs, byte[] data) {
         this.dfs = dfs;
         this.data = data;
@@ -25,6 +26,7 @@ public class Client implements Runnable {
     public void run() {
 
         DFileID b = dfs.createDFile();
+        file = b;
         dfs.write(b, data, 0, data.length);
         if (sleep != -1) {
             try {
@@ -33,8 +35,11 @@ public class Client implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String read() {
         byte[] out = new byte[data.length];
-        dfs.read(b, out, 0, out.length);
-        System.out.println(new String(out));
+        dfs.read(file, out, 0, out.length);
+        return new String(out);
     }
 }

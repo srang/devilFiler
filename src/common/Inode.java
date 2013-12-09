@@ -1,5 +1,6 @@
 package common;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class Inode {
@@ -15,8 +16,21 @@ public class Inode {
 	}
 	
 	public Inode (byte[] b) {
-		
-	}
+	    // first 3 bytes are the dFileID
+//        ByteBuffer byteBuffer = ByteBuffer.wrap(b, 0, 4);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(b);
+        this.fileID = new DFileID(byteBuffer.getInt(0));
+        // 4th byte is the order in the file
+        // next 4 bytes are inode size
+//        this.inodeSize = ByteBuffer.wrap(b, 4, 4).getInt();
+        this.inodeSize = byteBuffer.getInt(4);
+
+        // remaining bytes are block addresses
+        blockMap = new ArrayList<Integer>();
+        for(int i = 8; i < inodeSize*4 + 8; i += 4) {
+            blockMap.add(byteBuffer.getInt(i));
+        }
+    }
 	
 	// set methods
 	public void setBlockID(int block){
