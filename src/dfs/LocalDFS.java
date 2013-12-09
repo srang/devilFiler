@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import com.sun.corba.se.impl.orbutil.closure.Constant;
+
 import dblockcache.DBuffer;
 import dblockcache.DBufferCache;
 import dblockcache.LocalDBufferCache;
@@ -200,10 +202,10 @@ public class LocalDFS extends DFS {
     	this._cache.sync();
     }
     
-    private void updateFileDes(DFileID id) {   	
+    private synchronized void updateFileDes(DFileID id) {   	
     	DBuffer dbuffer = _cache.getBlock(id.getINodeList().get(0).getBlockID());
     	for(int i = 0; i < id.getINodeList().size(); i++) {
-    		byte[] buff = new byte[Constants.INODE_SIZE];
+    		byte[] buff = new byte[Constants.BLOCK_SIZE];
     		Inode node = id.getINodeList().get(i);
     		if(i > 0) {
     			dbuffer = _cache.getBlock(node.getBlockID());
@@ -211,11 +213,11 @@ public class LocalDFS extends DFS {
     		int inodeIndexedFileID = node.getFileID()+i;
     		byte[] FID = ByteBuffer.allocate(4).putInt(inodeIndexedFileID).array();
     		for(int j = 0; j < FID.length; j++) {
-    			buff[j] = FID[j];//writing out fileID with the inode index
+    			buff[j + node.getOffset()] = FID[j];//writing out fileID with the inode index
     		}
     		byte[] size = ByteBuffer.allocate(4).putInt(node.getInodeSize()).array();
     		for(int j = 0; j < size.length; j++) {
-    			buff[j + Constants.BLOCK_ADDRESS_SIZE] = size[j];//writing out size in bytes
+    			buff[j + Constants.BLOCK_ADDRESS_SIZE + node.getOffset()] = size[j];//writing out size in bytes
     		} 
     		ArrayList<Integer> blockMap = node.getBlockMap();
     		for(int x = 0; x < Constants.BLOCK_ADDRESSES_PER_INODE; x++) {
@@ -223,18 +225,19 @@ public class LocalDFS extends DFS {
     				int blockAddress = blockMap.get(x);
     				byte[] byteBlockAddress = ByteBuffer.allocate(4).putInt(blockAddress).array();
     				for(int j = 0; j < byteBlockAddress.length; j++) {
-    					buff[j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE] = byteBlockAddress[j];
+    					buff[j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE + node.getOffset()] = byteBlockAddress[j];
     				}
     			} else {
     				byte[] zeros = {0, 0, 0, 0};
     				for(int j = 0; j < zeros.length; j++) {
-    					buff[j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE] = zeros[j];
+    					buff[j + (x + 2) * Constants.BLOCK_ADDRESS_SIZE + node.getOffset()] = zeros[j];
     				}
     			}
     		}
-    		dbuffer.write(buff, node.getOffset(), buff.length);  
-    		((LocalDBufferCache)_cache).sync(dbuffer);
+    		dbuffer.write(buff, node.getOffset(), Constants.INODE_SIZE);  
+    		_cache.sync();
+    		_cache.releaseBlock(dbuffer);
     	}
-    	_cache.releaseBlock(dbuffer);
+    	
     }   
 }

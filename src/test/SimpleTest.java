@@ -1,7 +1,10 @@
 package test;
 
-import common.DFileID;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
+import common.DFileID;
 import dfs.LocalDFS;
 
 public class SimpleTest {
@@ -31,8 +34,15 @@ public class SimpleTest {
 
 
         DFileID c = dfs.createDFile();
-
         byte[] file1 = "The quick brown fox jumped over the lazy dog".getBytes();
+//        String str;
+//        try {
+//			Scanner s = new Scanner(new File("melville.txt"));
+//			str = s.
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
         dfs.write(c, file1, 0, file1.length);
         out = new byte[file1.length];
         dfs.read(c, out, 0, file1.length);

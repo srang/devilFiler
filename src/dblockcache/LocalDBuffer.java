@@ -43,7 +43,7 @@ public class LocalDBuffer extends DBuffer {
     }
 
     @Override
-    public boolean checkValid() {
+    public synchronized boolean checkValid() {
         return this.isValid;
     }
 
@@ -61,12 +61,12 @@ public class LocalDBuffer extends DBuffer {
     }
 
     @Override
-    public boolean checkClean() {
+    public synchronized boolean checkClean() {
         return this.isClean;
     }
 
     @Override
-    public boolean waitClean() {
+    public synchronized boolean waitClean() {
     	while (!this.isClean){
     			try {
 					this.wait();
