@@ -104,7 +104,8 @@ The createDFile method creates a new DFileID object with the first available fil
 
 The read and write functions call the DBuffer read and write functions for all DBuffers associated 
 	with the DFileID object used, cycling through all DBuffers in all the iNodes associated with 
-	that object, adjusting the "offset" and "count" values by a block size constant value.
+	that object, adjusting the "offset" and "count" values as necessary using a modulus of the 
+	block size Constants value.
 
 The sizeDFile and listAllDFiles are both simple and self-explanatory, and the DFS-level sync 
 	function simply calls the DBufferCache sync function.
