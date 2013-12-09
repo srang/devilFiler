@@ -80,10 +80,18 @@ public class LocalDBufferCache extends DBufferCache {
         for (int i = 0; i < this.buffers.size(); i++) {
             if (!this.buffers.get(this.buffers.keySet().toArray()[i]).isClean) {
                 this.buffers.get(this.buffers.keySet().toArray()[i]).startPush();
-                this.buffers.get(this.buffers.keySet().toArray()[i]).waitClean(); // is this wait appropriate here?
-                // some kind of signal here
+                this.buffers.get(this.buffers.keySet().toArray()[i]).waitClean(); 
             }
         }
+        this.notifyAll();
+    }
+    
+    public synchronized void sync(DBuffer buff) {
+    	if(!buff.isClean) {
+    		buff.startPush();
+    		buff.waitClean();
+    	}
+    	this.notifyAll();
     }
 
 }

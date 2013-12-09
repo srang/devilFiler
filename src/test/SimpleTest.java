@@ -5,7 +5,19 @@ import common.DFileID;
 import dfs.LocalDFS;
 
 public class SimpleTest {
-	public static void main(String[] args) {
+	public static void main (String[] args) {
+		SimpleTest test = new SimpleTest();
+		synchronized(test) {
+			test.run();
+		}
+	}
+
+
+	public SimpleTest() {
+		
+	}
+	
+	public void run() {
 		LocalDFS dfs = new LocalDFS();
 		dfs.init();
 		DFileID b = dfs.createDFile();
