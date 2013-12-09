@@ -57,7 +57,7 @@ public class LocalDFS extends DFS {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        rebuild();
+        //rebuild();
     }
 
     private void rebuild() {
