@@ -14,6 +14,10 @@ public class Inode {
 		inodeSize = 0;
 	}
 	
+	public Inode (byte[] b) {
+		//Make inode from byte[]
+	}
+	
 	// set methods
 	public void setBlockID(int block){
 		this.blockID = block;

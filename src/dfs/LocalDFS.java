@@ -56,9 +56,17 @@ public class LocalDFS extends DFS {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        rebuild();
     }
 
-    private void initInodes() {
+    private void rebuild() {
+    	for(int i = 0; i < Constants.INODE_REGION_SIZE; i++) {
+    		DBuffer buff = _cache.getBlock(i);
+    		
+    	}
+	}
+
+	private void initInodes() {
         int maxNumberOfInodes = Constants.BLOCK_SIZE/Constants.INODE_SIZE * Constants.INODE_REGION_SIZE;
         int blockIndex = 1;
         int blockOffset = 0;

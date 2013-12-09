@@ -44,8 +44,6 @@ public abstract class VirtualDisk implements IVirtualDisk {
 		_file.setLength(Constants.BLOCK_SIZE * Constants.NUM_OF_BLOCKS);
 		if(format) {
 			formatStore();
-		} else {
-			rebuild();
 		}
 	}
 	
@@ -66,17 +64,6 @@ public abstract class VirtualDisk implements IVirtualDisk {
 	 */
 	public abstract void startRequest(DBuffer buf, DiskOperationType operation) throws IllegalArgumentException,
 			IOException;
-	
-	/*
-	 * Attempts to rebuild DFS from a disk file. ***Checks for file corruption 
-	 */
-	private void rebuild() {
-		for(int i = 0; i < Constants.INODE_REGION_SIZE; i++) {
-			//Read in blocks
-			//create files
-			//make money get paid
-		}
-	}
 	
 	/*
 	 * Clear the contents of the disk by writing 0s to it
