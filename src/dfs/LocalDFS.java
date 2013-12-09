@@ -38,7 +38,7 @@ public class LocalDFS extends DFS {
         freeBlocks = new LinkedList<Integer>();
         
         
-        for (int i = 0; i < Constants.MAX_DFILES; i++) {
+        for (int i = 1; i < Constants.MAX_DFILES; i++) {
             freeFileIDs.add(i << 8);//shift bits over to allow for inode index
         }
 
@@ -61,10 +61,33 @@ public class LocalDFS extends DFS {
 
     private void rebuild() {
     	for(int i = 0; i < Constants.INODE_REGION_SIZE; i++) {
-    		DBuffer buff = _cache.getBlock(i);
-    		
+    		DBuffer buff = _cache.getBlock(i + 1); //Ignore the first block but still read right num blocks
+    		byte[] block = new byte[Constants.BLOCK_SIZE];
+    		buff.read(block, 0, Constants.BLOCK_SIZE);
+    		for(int j = 0; j < Constants.BLOCK_SIZE/Constants.BLOCK_SIZE; j++) {//Inodes per block
+    			byte[] inodeBytes = new byte[Constants.INODE_SIZE];
+    			for(int x = 0; x < inodeBytes.length; i++) {
+    				inodeBytes[x] = block[j * Constants.INODE_SIZE + x];
+    			}
+    			Inode inode = new Inode(inodeBytes);
+    			int fid = inode.getFileID();
+    			if(fid != 0) {
+    				int inodeIndex = fid & 255;
+    				int realFileID = (fid>>8)<<8;
+    				if(freeFileIDs.contains(realFileID)) {
+    					DFileID realID = dfiles.get(realFileID);
+    					realID.getINodeList().add(inodeIndex, inode);
+    					inode.setfileID(realID);
+    				} else {
+    					freeFileIDs.remove(realFileID);
+    					usedFileIDs.add(realFileID);
+    					DFileID FID = new DFileID(realFileID);
+    					dfiles.add(realFileID, FID);
+    				}
+    			}
+    		}
     	}
-	}
+    }
 
 	private void initInodes() {
         int maxNumberOfInodes = Constants.BLOCK_SIZE/Constants.INODE_SIZE * Constants.INODE_REGION_SIZE;
@@ -91,7 +114,7 @@ public class LocalDFS extends DFS {
         int fileId = freeFileIDs.poll();
         usedFileIDs.add(fileId);
         DFileID newDfile = new DFileID(fileId);
-        dfiles.add(newDfile);
+        dfiles.add(newDfile.getDFileID(), newDfile);;
         
         Inode inode = freeINodes.poll();
         usedINodes.add(inode);

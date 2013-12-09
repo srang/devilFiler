@@ -94,7 +94,8 @@ Our DFS keeps track off all DfileIDs created, the fileIDs that are free for use,
 	been allocated.
 
 In init() we initialize all of our available fileIDs, our inodes, and all blocks of memory 
-	all based on our Constants values.
+	all based on our Constants values. This also calls rebuild() which attempts to rebuild the 
+	old files from disk.
 
 The createDFile method creates a new DFileID object with the first available fileID and 
 	associates the first available iNode for use with that fileID.  The destroyDFile function 
@@ -118,12 +119,6 @@ The updateFileDes() function writes all of the inodes associated with a DFileID 
 The disk is split into Inode-Region and Main-Disk-Region. The Inode-Region is large 
 	that we can reference enough memory blocks for the max file size for the max number
 	of files. 
-
-*VirtualDisk.java:
-The only thing added to this file is the private rebuild() function which is the 
-	alternative to formatStore(). rebuild() attempts to read the file _volumeName and 
-	create our object hierarchy from its data. 
-
 /************************
  * Feedback on the lab
  ************************/
