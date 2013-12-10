@@ -37,6 +37,7 @@ public class LoadingDiskTest {
 		for(int i = 0; i < dfs.size(); i++) {
 			System.out.println(dfs.get(i).getDFileID());
 		}
+		System.out.println("LoadingDiskTest.java Persistence test complete");
         ps.close();
         output.close();
         try {
