@@ -16,7 +16,7 @@ public class SimpleTest {
 	}
 	
 	public void run() {
-		File log = new File("Test.log");
+		File log = new File("DeFiler.log");
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(log);

@@ -8,15 +8,15 @@
 
 	Name1: Sam Rang
 	NetId1: spr20
-	Time spent: 20 hours
+	Time spent: 40 hours
 
 	Name2: Brad Levergood
 	NetId2: brl8
-	Time spent: 20 hours
+	Time spent: 40 hours
 
 	Name3: Zach Michaelov
 	NetId3: zgm3
-	Time spent: 20 hours
+	Time spent: 40 hours
 
 /******************
  * Files to submit
@@ -118,7 +118,23 @@ The updateFileDes() function writes all of the inodes associated with a DFileID 
 *LocalVirtualDisk.java:
 The disk is split into Inode-Region and Main-Disk-Region. The Inode-Region is large 
 	that we can reference enough memory blocks for the max file size for the max number
-	of files. 
+	of files.
+
+	TESTING:
+	To test our DeFiler, we created a Main.java file that runs our individual test cases in sequence, 
+	and prints their outputs to a log file, DeFiler.log.  
+	
+	All tests are explained in the log file, but the first test file SimpleTest.java checks the
+	basic operations of the DeFiler, calling init, creating 2 files, writing to and reading from the
+	first file twice, writing to and reading from the second file once, deleting the first file
+	and calling listAllDFiles before and after that deletion.
+
+	The second test, LargeFileTest.java, tests our DeFiler's ability to write a large amount of 
+	data to a Dfile and then read that data back from the file, which requires the resulting
+	file to use multiple data blocks.
+
+	The third test, MultiThreadTest.java, tests our DeFiler's capability to be accessed by multiple client threads, which each create a separate file and write to and then read from those respective files, to show that they are all in the same DeFiler object, we call our DeFiler's listAllDFiles method at the end of the clients' reads are complete.
+
 /************************
  * Feedback on the lab
  ************************/
