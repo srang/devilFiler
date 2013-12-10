@@ -80,6 +80,7 @@ public class SimpleTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        dfs.stop();
     }
 
 }
