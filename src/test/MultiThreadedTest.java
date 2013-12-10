@@ -16,10 +16,10 @@ public class MultiThreadedTest {
     
     public void run()  throws InterruptedException{
     	
-		File log = new File("MultiThreadedTest.log");
+		//File log = new File("Test.log");
 		FileOutputStream fos = null;
 		try {
-			fos = new FileOutputStream(log);
+			fos = new FileOutputStream("DeFiler.log",true);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -57,6 +57,7 @@ public class MultiThreadedTest {
             System.out.println(dFileID);
         }
         
+        System.out.println("\nEnd of MultiThreadedTest.java\n");
         ps.close();
         output.close();
         try {
