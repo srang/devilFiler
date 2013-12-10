@@ -57,13 +57,11 @@ public class LocalDFS extends DFS {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //rebuild();
+        rebuild();
     }
 
     private void rebuild() {
-    	System.out.println("Rebuilding....");
     	for(int i = 0; i < Constants.INODE_REGION_SIZE; i++) {
-    		System.out.println("READING BLOCK " + i);
     		DBuffer buff = _cache.getBlock(i + 1); //Ignore the first block but still read right num blocks
     		byte[] block = new byte[Constants.BLOCK_SIZE];
     		buff.read(block, 0, Constants.BLOCK_SIZE);
@@ -73,14 +71,16 @@ public class LocalDFS extends DFS {
     				inodeBytes[x] = block[j * Constants.INODE_SIZE + x];
     			}
     			Inode inode = new Inode(inodeBytes);
-    			System.out.println("BUILD INODE " + j);
     			int fid = inode.getFileID();
     			if(fid != 0) {
-    				int inodeIndex = fid & 255;
+    				//int inodeIndex = fid & 255;
     				int realFileID = (fid>>8)<<8;
     				if(!freeFileIDs.contains(realFileID)) {
+    					if(realFileID == 0) {
+    						System.out.println("Issue");
+    					}
     					DFileID realID = dfiles[(realFileID>>8)-1];
-    					realID.getINodeList().add(inodeIndex, inode);
+    					realID.getINodeList().add(inode);
     					inode.setfileID(realID);
     				} else {
     					freeFileIDs.remove(realFileID);
@@ -132,7 +132,7 @@ public class LocalDFS extends DFS {
 
     @Override
     public synchronized void destroyDFile(DFileID dFID) {
-
+    	this.dfiles[dFID.getDFileID()>>8-1] = null;
     	for (int i = 0; i<dFID.getINodeList().size(); i++){
         	Inode hold = dFID.getINodeList().get(i);
         	// memory block freeing
@@ -149,8 +149,6 @@ public class LocalDFS extends DFS {
         	freeINodes.add(hold);
         	dFID.getINodeList().remove(hold);
         }
-    	
-    	this.dfiles[dFID.getDFileID()>>8-1] = null;
         this.usedFileIDs.remove(dFID); // file Id is no longer used
         this.freeFileIDs.add(dFID.getDFileID()); // let file descriptor be reused
     }
@@ -229,7 +227,14 @@ public class LocalDFS extends DFS {
 
     @Override
     public List<DFileID> listAllDFiles() {
-        return new ArrayList<DFileID>(Arrays.asList(dfiles));
+        ArrayList<DFileID> dfilesAsList = new ArrayList<DFileID>(Arrays.asList(dfiles));
+        ArrayList<DFileID> ret = new ArrayList<DFileID>();
+        for(DFileID a : dfilesAsList) {
+        	if(a!=null){
+        		ret.add(a);
+        	}
+        }
+        return ret;
     }
 
     @Override

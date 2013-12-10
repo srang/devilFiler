@@ -97,6 +97,14 @@ In init() we initialize all of our available fileIDs, our inodes, and all blocks
 	all based on our Constants values. This also calls rebuild() which attempts to rebuild the 
 	old files from disk.
 
+There is a bug in rebuild() because we are reading back inodes, and you are not guaranteed that 
+	the inodes are in order, ideally I would call ArrayList.add(index i, Inode element) when adding
+	inodes to a file, however ArrayList doesn't allow you to add something at an index greater than 
+	the current size. Also, we don't know what the size of the file is until we read in all of the 
+	inodes. We could use a map where we map an inode to an index but that would make iterating much
+	more difficult. Currently we just add inodes regardless of order even though we have a way retrieving
+	an inode index from disk.
+
 The createDFile method creates a new DFileID object with the first available fileID and 
 	associates the first available iNode for use with that fileID.  The destroyDFile function 
 	frees all memory blocks associated with all iNodes associated with the DFile, frees 
