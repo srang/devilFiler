@@ -5,6 +5,7 @@ public class Main {
 		SimpleTest test1 = new SimpleTest();
 		LargeFileTest test2 = new LargeFileTest();
 		MultiThreadedTest test3 = new MultiThreadedTest();
+		LoadingDiskTest test4 = new LoadingDiskTest();
 		synchronized(test1) {
 			test1.run();
 		}
@@ -20,6 +21,9 @@ public class Main {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+		synchronized(test4) {
+			test4.run();
 		}
 	}
 }
