@@ -132,7 +132,6 @@ public class LocalDFS extends DFS {
 
     @Override
     public synchronized void destroyDFile(DFileID dFID) {
-    	this.dfiles[dFID.getDFileID()>>8-1] = null;
     	for (int i = 0; i<dFID.getINodeList().size(); i++){
         	Inode hold = dFID.getINodeList().get(i);
         	// memory block freeing
@@ -149,8 +148,13 @@ public class LocalDFS extends DFS {
         	freeINodes.add(hold);
         	dFID.getINodeList().remove(hold);
         }
-        this.usedFileIDs.remove(dFID); // file Id is no longer used
-        this.freeFileIDs.add(dFID.getDFileID()); // let file descriptor be reused
+    	//updateFileDes(dFID);\
+    	int removeID = dFID.getDFileID(); 
+        this.usedFileIDs.remove(removeID); // file Id is no longer used
+        this.freeFileIDs.add(removeID); // let file descriptor be reused
+        dFID = null;
+    	this.dfiles[(removeID>>8)-1] = null;
+    	
     }
 
     @Override
