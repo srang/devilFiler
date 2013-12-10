@@ -30,7 +30,7 @@ public abstract class DFS {
 
 	/* Initialize all the necessary structures with sizes as specified in the common/Constants.java */
 	public abstract void init();
-
+    public abstract void stop();
 	/* creates a new DFile and returns the DFileID, which is useful to uniquely identify the DFile*/
 	public abstract DFileID createDFile();
 	

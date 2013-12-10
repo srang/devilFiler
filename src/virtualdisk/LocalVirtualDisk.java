@@ -10,29 +10,31 @@ import java.util.Queue;
 
 public class LocalVirtualDisk extends VirtualDisk {
     private Queue<IORequest> requestQueue;
+    private boolean isRunning = true;
+
     public LocalVirtualDisk(String volName, boolean format) throws FileNotFoundException, IOException {
         super(volName, format);
         requestQueue = new LinkedList<IORequest>();
-        this.start();
+//        this.start();
     }
 
     public LocalVirtualDisk(boolean format) throws FileNotFoundException, IOException {
         super(format);
         requestQueue = new LinkedList<IORequest>();
-        this.start();
+//        this.start();
     }
 
     public LocalVirtualDisk() throws FileNotFoundException, IOException {
         super();
         requestQueue = new LinkedList<IORequest>();
-        this.start();
+//        this.start();
     }
 
-    private void start() {
+    public void start() {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(true) {
+                while(isRunning) {
                     try {
                         processRequests();
                     } catch (IOException e) {
@@ -49,6 +51,12 @@ public class LocalVirtualDisk extends VirtualDisk {
         // add request to our queue
         requestQueue.add(new IORequest(buf, operation));
     }
+
+    @Override
+    public void stop() {
+        isRunning = false;
+    }
+
     private synchronized void processRequests() throws IOException {
         while(!requestQueue.isEmpty()) {
             IORequest request = requestQueue.poll();

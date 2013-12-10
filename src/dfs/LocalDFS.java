@@ -25,6 +25,8 @@ public class LocalDFS extends DFS {
 
     private Queue<Integer> freeBlocks;
     private Set<Integer> usedBlocks;
+    private VirtualDisk disk;
+
     @Override
     public void init() {
         dfiles = new DFileID[Constants.MAX_DFILES];
@@ -52,12 +54,18 @@ public class LocalDFS extends DFS {
 
         // init virtual disk
         try {
-            VirtualDisk disk = new LocalVirtualDisk();
+            disk = new LocalVirtualDisk();
+            disk.start();
             _cache = new LocalDBufferCache(Constants.NUM_OF_CACHE_BLOCKS, disk);
         } catch (IOException e) {
             e.printStackTrace();
         }
         //rebuild();
+    }
+
+    @Override
+    public void stop() {
+        disk.stop();
     }
 
     private void rebuild() {

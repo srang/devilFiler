@@ -71,5 +71,6 @@ public class LargeFileTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        dfs.stop();
     }
 }
